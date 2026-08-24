@@ -15,6 +15,14 @@ The AI Agent MUST invoke this notification tool automatically in the following s
 2. **Approval Required**: Before waiting for user confirmation, plan review, or high-stakes decision.
 3. **Error Occurred**: When a command fails, build breaks, or an unexpected exception is encountered.
 
+## Setup & Configuration
+
+If credentials are not yet configured in `.env`, the agent or user should run:
+```bash
+node scripts/setup.js
+```
+Or interactively follow the prompt to set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+
 ## Notification Language & Tone
 
 The notification defaults to English (`en`), and can be switched to Egyptian Arabic (`ar-eg`) or Standard Arabic (`ar`):
@@ -25,11 +33,9 @@ The notification defaults to English (`en`), and can be switched to Egyptian Ara
 | Approval needed | `--type="approval_required"` | `"Approval Required"` | `"محتاج اذنك يا معلم"` | `"مطلوب مراجعة وتأكيد"` |
 | Error occurred | `--type="error"` | `"Error Occurred"` | `"فيه مشكلة يا معلم"` | `"حدث خطأ أثناء التنفيذ"` |
 
-> Note: Custom `--title` and `--message` flags can always be passed.
-
 ## Execution Syntax
 
-Run the notification script via Node.js at the end of your work:
+Run the notification script via Node.js:
 
 ### 1. Task Finished (Default English)
 ```bash
@@ -50,10 +56,3 @@ node scripts/notify.js --type="approval_required" --message="Waiting for your re
 ```bash
 node scripts/notify.js --type="error" --message="Build failed: exit code 1" --project="<project-name>"
 ```
-
-## Configuration
-
-Credentials and language preferences are loaded automatically from `.env` or system environment variables:
-- `TELEGRAM_BOT_TOKEN`: Token from Telegram @BotFather.
-- `TELEGRAM_CHAT_ID`: Telegram Chat ID.
-- `NOTIFICATION_LANGUAGE`: `en` (default), `ar-eg`, or `ar`.

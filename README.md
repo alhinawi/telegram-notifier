@@ -1,104 +1,64 @@
-# 🚀 Telegram Notifier & Remote Control Guide for AI Agents
+# telegram-notifier
 
-> **Universal Telegram notification plugin & skill for AI Coding Agents** (Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, CI/CD pipelines, Git hooks, and scripts) + **Parsec Remote Desktop Setup Guide**.
+▲ **Skills** • **AI Agents** • **Remote Dev**
 
----
+Universal **Telegram notification skill & plugin** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals are needed, or errors occur + **Parsec** mobile remote control guide.
 
-## 🌟 Overview
-
-When working with modern AI coding agents, long-running tasks like builds, multi-file refactoring, database migrations, or test suite runs often require time to execute. Instead of sitting in front of your PC waiting, **Telegram Notifier** alerts your mobile phone in real-time when:
-
-- ✅ **Task Finishes**: When an AI agent or build completes successfully (`Task Finished` or `"خلصت يا معلم"`).
-- ⚠️ **Approval Required**: When human feedback, plan review, or confirmation is needed (`Approval Required` or `"محتاج اذنك يا معلم"`).
-- ❌ **Error Occurred**: When a command, test, or build fails (`Error Occurred` or `"فيه مشكلة يا معلم"`).
-
-Paired with **Parsec**, you get total freedom: get notified on your phone, open Parsec, and instantly review & control your workstation from anywhere!
+**Best use**: let your AI agent do the heavy lifting (builds, migrations, tests, code refactoring), step away from your desk, get notified on Telegram (`Task Finished` or `"خلصت يا معلم"`), and instantly control your PC from your smartphone via Parsec.
 
 ---
 
-## ⚡ Features
+## ⚡ Install
 
-- 🧙‍♂️ **Interactive CLI Setup Wizard**: Run `npm run setup` for a 1-click guided setup that configures tokens, detects your chat ID, picks your language, and sends a test message.
-- 🤖 **Universal AI Agent Support**: Compatible with Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, Git Hooks, and CI/CD pipelines.
-- 🌐 **Multi-Language Presets**: Default English (`en`), Egyptian Arabic (`ar-eg`), and Modern Standard Arabic (`ar`), plus custom titles.
-- 🔍 **Auto Chat ID Detection**: Auto-discovers your Telegram Chat ID automatically by reading updates from your bot.
-- ⚙️ **Global or Local Auto-Triggering**: Install globally for all projects on your machine, or scope it locally per repository so AI agents notify you automatically without manual commands.
-- ⚡ **Zero External Dependencies**: Built with native Node.js (`https`, `readline`, `fs`, `path`) — runs instantly on any machine.
-- 🔒 **Security First**: Credentials are kept strictly in `.env` and ignored by Git.
-
----
-
-## 🚀 Quick Start (Interactive Setup Wizard)
-
-The fastest way to set up everything is using the interactive wizard:
-
+Browse the package first:
 ```bash
-# 1. Clone the repository
-git clone https://github.com/alhinawi/telegram-notifier.git
-cd telegram-notifier
-
-# 2. Run the interactive setup wizard
-npm run setup
+npx skills add alhinawi/telegram-notifier --list
 ```
 
-The wizard will guide you through:
-1. 🔑 Entering your **Telegram Bot Token** (from `@BotFather`).
-2. 🔍 **Auto-detecting your Chat ID** (just send `/start` to your bot).
-3. 🌐 Choosing your **Language** (English / Egyptian Arabic / Standard Arabic).
-4. ⚙️ Selecting **Installation Scope** (Global plugin or Local workspace).
-5. 🔔 Sending a live **Test Notification** to your phone!
+Install the package:
+```bash
+npx skills add alhinawi/telegram-notifier
+```
+
+Or run the interactive setup wizard directly:
+```bash
+npx github:alhinawi/telegram-notifier
+```
 
 ---
 
-## 🤖 1-Click Installation Prompts for AI Agents
+## 🤖 1-Click Prompt for AI Agents
 
-You can simply copy and paste either of the following prompts directly to your AI Coding Agent (Antigravity, Claude Code, Cursor Composer, Windsurf Cascade, etc.) to have it set up everything automatically:
+Give this prompt to your AI Agent (Antigravity, Claude Code, Cursor, Windsurf, Copilot) to install and configure everything automatically:
 
 ### 🇬🇧 English Prompt
 ```text
-Please install and configure the telegram-notifier tool from https://github.com/alhinawi/telegram-notifier into this workspace/environment. Follow its setup instructions to configure the skill and rules, and ensure you automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
+Please install and configure the telegram-notifier skill by running `npx skills add alhinawi/telegram-notifier` (or via https://github.com/alhinawi/telegram-notifier). Follow the setup instructions to configure the bot token and chat ID, and make sure to automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
 ```
 
 ### 🇪🇬 Arabic Prompt (برومبت بالعربي)
 ```text
-من فضلك قم بتثبيت وإعداد أداة telegram-notifier من المستودع https://github.com/alhinawi/telegram-notifier في بيئة العمل الحالية. اتبع تعليمات الإعداد لتفعيل الـ Skill والقواعد، واحرص على إرسال إشعار تليجرام تلقائياً في كل مرة تنتهي فيها من مهمة، أو تحتاج إذني وموافقتي، أو عند حدوث أي خطأ بدون أن أحتاج لتشغيلها يدوياً.
+من فضلك قم بتثبيت وإعداد مهارة telegram-notifier عبر تشغيل الأمر `npx skills add alhinawi/telegram-notifier` (أو من المستودع https://github.com/alhinawi/telegram-notifier). اتبع خطوات الإعداد لربط الـ Bot Token والـ Chat ID، واحرص على إرسال إشعار تليجرام تلقائياً في كل مرة تنتهي فيها من مهمة، أو تحتاج إذني وموافقتي، أو عند حدوث أي خطأ بدون أن أحتاج لتشغيلها يدوياً.
 ```
 
 ---
 
-## 📲 Step-by-Step Manual Setup
+## 🌟 What the Setup Wizard Does
 
-### 1. Create a Telegram Bot
-1. Open Telegram and search for `@BotFather`.
-2. Send `/newbot` and follow the on-screen instructions to set a name and username for your bot.
-3. `@BotFather` will give you an **HTTP API Token** (e.g. `1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ`).
-
-### 2. Configure `.env`
-1. Duplicate `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Set your credentials and preferred language:
-   ```env
-   TELEGRAM_BOT_TOKEN=your_bot_token_here
-   TELEGRAM_CHAT_ID=your_chat_id_here
-   NOTIFICATION_LANGUAGE=en
-   ```
-
-### 3. Auto-Detect Your `TELEGRAM_CHAT_ID`
-1. Open Telegram and search for your newly created bot.
-2. Click **Start** or send any message to the bot (e.g., `Hello`).
-3. Run:
-   ```bash
-   npm run detect-chat-id
-   ```
-4. The script will automatically fetch your Chat ID and write it directly into your `.env` file!
+When you run `npx github:alhinawi/telegram-notifier` or configure the skill:
+1. 🔑 **Telegram Bot Token**: Asks for your token from `@BotFather`.
+2. 🔍 **Auto-detect Chat ID**: Listens for `/start` sent to your bot and detects your Chat ID automatically.
+3. 🌐 **Language Preference**: Choose English (`en` - default), Egyptian Arabic (`ar-eg`), or Standard Arabic (`ar`).
+4. ⚙️ **Installation Scope**:
+   - **Global**: Automatically activates for all projects and AI agents on your machine.
+   - **Local**: Configures rules and skills inside the current repository.
+5. 🔔 **Live Test**: Sends an instant test notification to your phone to confirm everything is working!
 
 ---
 
 ## 🌐 Language Options & Presets
 
-You can configure the language globally in `.env` (`NOTIFICATION_LANGUAGE=en|ar-eg|ar`) or specify `--lang` per call:
+You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar-eg|ar`) or specify `--lang` per call:
 
 | Event Type | English (Default `en`) | Egyptian Arabic (`ar-eg`) | Standard Arabic (`ar`) |
 |---|---|---|---|
@@ -108,13 +68,10 @@ You can configure the language globally in `.env` (`NOTIFICATION_LANGUAGE=en|ar-
 
 ---
 
-## ⚙️ Connecting to ANY AI Agent
+## ⚙️ How AI Agents Trigger It Automatically
 
-### 1. Antigravity / Gemini CLI
-- **Global Installation**:
-  Copy the folder to `~/.gemini/config/plugins/telegram-notifier/`.
-- **Local Project**:
-  Place `skills/telegram-notifier/SKILL.md` inside `.agents/skills/telegram-notifier/SKILL.md`.
+### 1. Antigravity & Gemini CLI
+Installed globally in `~/.gemini/config/plugins/telegram-notifier/` or locally in `.agents/skills/telegram-notifier/`. The agent detects the skill and triggers it automatically.
 
 ### 2. Claude Code
 Add to `.claude/skills/telegram-notifier/SKILL.md` or instruct in `CLAUDE.md`:
@@ -130,35 +87,22 @@ When completing any task, needing human approval, or encountering an error:
 Execute `node /path/to/telegram-notifier/scripts/notify.js --type=task_finished`
 ```
 
-### 4. Direct CLI / Terminal / PowerShell
-```bash
-# Node.js
-node scripts/notify.js --type=task_finished --message="Build complete with 0 errors" --project="my-app"
-
-# Egyptian Arabic Tone
-node scripts/notify.js --type=task_finished --lang="ar-eg" --message="الفرونت إند والباك إند تمام"
-
-# PowerShell (Windows)
-.\scripts\notify.ps1 -Type "approval_required" -Title "Approval Needed" -Message "Plan review required"
-```
-
 ---
 
 ## 💻 Parsec Integration Guide (التحكم في الكمبيوتر من الموبايل)
 
 ### What is Parsec?
-[Parsec](https://parsec.app/) is a free, ultra-low latency, 60 FPS remote desktop application designed for gaming and real-time interactive work. It allows you to control your PC from your smartphone or laptop with zero perceived lag and crystal-clear display.
+[Parsec](https://parsec.app/) is a free, ultra-low latency, 60 FPS remote desktop application. It lets you control your PC from your smartphone with zero perceived lag and full desktop interactivity.
 
 ---
 
 ### How to Set Up Parsec for Mobile Remote Control
 
 #### A. PC Host Setup (Desktop / Workstation)
-1. Download and install **Parsec** for Windows/macOS from [parsec.app](https://parsec.app/).
-2. Create a free Parsec account and log in.
-3. In **Settings -> Host**:
-   - Ensure **Hosting** is set to `Enabled`.
-   - Keep Parsec running in the system tray.
+1. Download and install **Parsec** from [parsec.app](https://parsec.app/).
+2. Create a free account and log in.
+3. In **Settings -> Host**, ensure **Hosting** is set to `Enabled`.
+4. Keep Parsec running in the background.
 
 #### B. Mobile App Setup (Smartphone)
 1. Download **Parsec** from Google Play Store (Android) or App Store (iOS).
