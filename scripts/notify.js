@@ -13,13 +13,16 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const os = require('os');
 
-// Helper to load .env file from script parent dir or current working dir
+// Helper to find .env file across potential locations (local project, script parent, or global plugin dir)
 function loadEnv() {
   const env = { ...process.env };
+  const homeDir = os.homedir();
   const possiblePaths = [
+    path.resolve(process.cwd(), '.env'),
     path.resolve(__dirname, '..', '.env'),
-    path.resolve(process.cwd(), '.env')
+    path.join(homeDir, '.gemini', 'config', 'plugins', 'telegram-notifier', '.env'),
   ];
 
   for (const envPath of possiblePaths) {
@@ -40,7 +43,7 @@ function loadEnv() {
           }
         });
       } catch (err) {
-        console.error(`[Telegram Notifier] Error reading .env (${envPath}): ${err.message}`);
+        // silently continue to next possible location
       }
     }
   }
@@ -53,11 +56,12 @@ const CHAT_ID = env.TELEGRAM_CHAT_ID;
 
 if (!BOT_TOKEN || !CHAT_ID) {
   console.error('[Telegram Notifier] Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set in .env or environment variables.');
+  console.error('Run `npm run setup` to configure your credentials interactively.');
   process.exit(1);
 }
 
 // Parse command line arguments
-// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name"
+// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar-eg|ar"
 const args = process.argv.slice(2);
 const params = {};
 
@@ -79,48 +83,52 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-const type = (params.type || 'info').toLowerCase();
-const title = params.title || 'Notification';
-const message = params.message || params.text || '';
-const project = params.project || path.basename(process.cwd()) || 'General Project';
+const rawType = (params.type || 'info').toLowerCase();
+const lang = (params.lang || env.NOTIFICATION_LANGUAGE || 'en').toLowerCase();
 
-// Format emoji and header based on event type
-let headerEmoji = 'ℹ️';
-let eventLabel = 'Notification';
+// Language and Preset Localization Dictionary
+const LOCALES = {
+  en: {
+    task_finished: { title: 'Task Finished', emoji: '✅', label: 'Task Finished' },
+    approval_required: { title: 'Approval Required', emoji: '⚠️', label: 'Approval Required' },
+    error: { title: 'Error Occurred', emoji: '❌', label: 'Error Occurred' },
+    info: { title: 'Notification', emoji: 'ℹ️', label: 'Notification' },
+    alert: { title: 'Alert', emoji: '🔔', label: 'Alert' },
+  },
+  'ar-eg': {
+    task_finished: { title: 'خلصت يا معلم', emoji: '✅', label: 'تمت المهمة' },
+    approval_required: { title: 'محتاج اذنك يا معلم', emoji: '⚠️', label: 'مطلوب إذنك' },
+    error: { title: 'فيه مشكلة يا معلم', emoji: '❌', label: 'حدث خطأ' },
+    info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
+    alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
+  },
+  ar: {
+    task_finished: { title: 'اكتملت المهمة بنجاح', emoji: '✅', label: 'اكتملت المهمة' },
+    approval_required: { title: 'مطلوب مراجعة وتأكيد', emoji: '⚠️', label: 'مطلوب الموافقة' },
+    error: { title: 'حدث خطأ أثناء التنفيذ', emoji: '❌', label: 'حدث خطأ' },
+    info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
+    alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
+  },
+};
 
-switch (type) {
-  case 'finish':
-  case 'task_finish':
-  case 'task_finished':
-  case 'task_complete':
-  case 'task_completed':
-  case 'success':
-    headerEmoji = '✅';
-    eventLabel = 'Task Finished';
-    break;
+const activeLocale = LOCALES[lang] || LOCALES.en;
 
-  case 'approval':
-  case 'approval_required':
-  case 'approval_needed':
-  case 'feedback':
-  case 'prompt':
-    headerEmoji = '⚠️';
-    eventLabel = 'Approval Required';
-    break;
-
-  case 'error':
-  case 'failed':
-  case 'exception':
-  case 'alert':
-    headerEmoji = '❌';
-    eventLabel = 'Error Occurred';
-    break;
-
-  default:
-    headerEmoji = '🔔';
-    eventLabel = 'Alert';
-    break;
+// Normalize event type key
+let normalizedKey = 'info';
+if (['finish', 'task_finish', 'task_finished', 'task_complete', 'task_completed', 'success', 'done'].includes(rawType)) {
+  normalizedKey = 'task_finished';
+} else if (['approval', 'approval_required', 'approval_needed', 'feedback', 'prompt', 'ask'].includes(rawType)) {
+  normalizedKey = 'approval_required';
+} else if (['error', 'failed', 'exception', 'failure', 'bug'].includes(rawType)) {
+  normalizedKey = 'error';
 }
+
+const config = activeLocale[normalizedKey] || activeLocale.info;
+const headerEmoji = config.emoji;
+const eventLabel = config.label;
+const title = params.title || config.title;
+const message = params.message || params.text || '';
+const project = params.project || path.basename(process.cwd()) || 'Project';
 
 const now = new Date().toLocaleString();
 
@@ -129,7 +137,7 @@ const telegramText = [
   `${headerEmoji} *[${eventLabel}]* \`${project}\``,
   `*${title}*`,
   message ? `\n${message}` : '',
-  `\n🕒 _${now}_`
+  `\n🕒 _${now}_`,
 ].join('\n');
 
 function sendTelegramMessage(text) {

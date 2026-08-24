@@ -1,12 +1,14 @@
 {
   "name": "telegram-notifier",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Universal Telegram Notifier for AI Agents (Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, CI/CD, Git Hooks)",
   "main": "scripts/notify.js",
   "bin": {
-    "agent-notify": "scripts/notify.js"
+    "agent-notify": "scripts/notify.js",
+    "telegram-setup": "scripts/setup.js"
   },
   "scripts": {
+    "setup": "node scripts/setup.js",
     "notify": "node scripts/notify.js",
     "detect-chat-id": "node scripts/auto-detect-chat-id.js"
   },
