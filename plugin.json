@@ -1,0 +1,18 @@
+{
+  "name": "telegram-notifier",
+  "version": "1.0.0",
+  "description": "Universal Telegram notification plugin for AI coding agents: tasks, approvals, and errors.",
+  "author": {
+    "name": "Mohamed Alhinawi"
+  },
+  "license": "MIT",
+  "keywords": [
+    "telegram",
+    "notification",
+    "alerts",
+    "tasks",
+    "approvals",
+    "errors",
+    "ai-agent"
+  ]
+}

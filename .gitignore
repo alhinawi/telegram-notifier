@@ -1,0 +1,17 @@
+# Environment & Secret files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node modules
+node_modules/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
