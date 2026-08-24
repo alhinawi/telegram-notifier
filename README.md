@@ -20,7 +20,7 @@ Install the package:
 npx skills add alhinawi/telegram-notifier
 ```
 
-Or run the interactive setup wizard directly:
+Or run the interactive setup wizard directly: (Recommended)
 ```bash
 npx github:alhinawi/telegram-notifier
 ```
