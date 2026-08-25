@@ -18,9 +18,11 @@ The AI Agent MUST invoke this notification tool automatically in the following s
 ## Setup & Configuration
 
 If credentials are not yet configured in `.env`, the agent or user should run:
+
 ```bash
 node scripts/setup.js
 ```
+
 Or interactively follow the prompt to set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
 
 ## Notification Language & Tone
@@ -28,7 +30,7 @@ Or interactively follow the prompt to set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHA
 The notification defaults to English (`en`), and can be switched to Egyptian Arabic (`ar-eg`) or Standard Arabic (`ar`):
 
 | Event Type | Flag | English (Default) | Egyptian Arabic (`ar-eg`) | Standard Arabic (`ar`) |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Task finished | `--type="task_finished"` | `"Task Finished"` | `"خلصت يا معلم"` | `"اكتملت المهمة بنجاح"` |
 | Approval needed | `--type="approval_required"` | `"Approval Required"` | `"محتاج اذنك يا معلم"` | `"مطلوب مراجعة وتأكيد"` |
 | Error occurred | `--type="error"` | `"Error Occurred"` | `"فيه مشكلة يا معلم"` | `"حدث خطأ أثناء التنفيذ"` |
@@ -38,21 +40,25 @@ The notification defaults to English (`en`), and can be switched to Egyptian Ara
 Run the notification script via Node.js:
 
 ### 1. Task Finished (Default English)
+
 ```bash
 node scripts/notify.js --type="task_finished" --message="Completed task successfully." --project="<project-name>"
 ```
 
 ### 2. Task Finished (Egyptian Arabic)
+
 ```bash
 node scripts/notify.js --type="task_finished" --lang="ar-eg" --message="خلصت التعديلات وكل التيستات تمام" --project="<project-name>"
 ```
 
 ### 3. Approval Required
+
 ```bash
 node scripts/notify.js --type="approval_required" --message="Waiting for your review on the implementation plan." --project="<project-name>"
 ```
 
 ### 4. Error Occurred
+
 ```bash
 node scripts/notify.js --type="error" --message="Build failed: exit code 1" --project="<project-name>"
 ```

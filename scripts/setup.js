@@ -296,12 +296,34 @@ async function main() {
     const input = await ask('Enter your Telegram Chat ID: ');
     chatId = input.trim();
   } else {
-    const detected = await detectChatId(botToken);
-    if (detected) {
-      chatId = detected;
-    } else {
-      const input = await ask('Please enter your Chat ID manually: ');
-      chatId = input.trim();
+    while (!chatId) {
+      const detected = await detectChatId(botToken);
+      if (detected) {
+        chatId = detected;
+        break;
+      }
+
+      console.log('\n--------------------------------------------------------');
+      console.log('📌 What would you like to do?');
+      console.log('  [1] Try again (Retry auto-detection)');
+      console.log('  [2] Enter Chat ID manually');
+      console.log('  [3] Exit');
+      const retryChoice = await ask('Choose option [1/2/3] (Default: 1): ');
+      const val = retryChoice.trim() || '1';
+
+      switch (val) {
+        case '2': {
+          const input = await ask('Please enter your Telegram Chat ID: ');
+          chatId = input.trim();
+          break;
+        }
+        case '3':
+          console.log('\n👋 Setup cancelled. Exiting...');
+          rl.close();
+          process.exit(0);
+        default:
+          break;
+      }
     }
   }
 
