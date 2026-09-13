@@ -1,32 +1,104 @@
 # telegram-notifier
 
-▲ **Skills** • **AI Agents** • **Remote Dev**
+▲ **Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
 
-Universal **Telegram notification skill & plugin** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals are needed, or errors occur + **Parsec** mobile remote control guide.
+Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
 
-**Best use**: let your AI agent do the heavy lifting (builds, migrations, tests, code refactoring), step away from your desk, get notified on Telegram (`Task Finished` or `"خلصت يا معلم"`), and instantly control your PC from your smartphone via Parsec.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 📱 You (Telegram)
+    participant Bot as 🤖 Listener Daemon (Background Service)
+    participant Agent as 🧠 AI Coding Agent (Gemini / Claude / Aider)
+    
+    User->>Bot: /projects
+    Bot->>User: 📂 Displays Recent Projects with Inline Buttons
+    User->>Bot: Taps project button (Switch Workspace)
+    Bot->>User: ✅ Switched to selected project
+    User->>Bot: Sends prompt: "Fix the login authentication bug"
+    Bot->>User: ⏳ "Starting task in project..."
+    Bot->>Agent: Runs CLI agent in active workspace
+    Agent->>Agent: Executes code / runs tests
+    Agent->>Bot: Completes task with output
+    Bot->>User: 📱 Result notification: "Task Finished Successfully ✅"
+```
 
 ---
 
-## ⚡ Install
+## ⚡ Quick Start
 
-Browse the package first:
-
-```bash
-npx skills add alhinawi/telegram-notifier --list
-```
-
-Install the package:
+Install via skills CLI:
 
 ```bash
 npx skills add alhinawi/telegram-notifier
 ```
 
-Or run the interactive setup wizard directly: (Recommended)
+Or run the interactive setup wizard: (Recommended)
 
 ```bash
-npx github:alhinawi/telegram-notifier
+node scripts/setup.js
 ```
+
+During setup, the wizard will:
+
+1. 🔑 Connect your Telegram Bot Token & auto-detect your Chat ID.
+2. 📁 Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
+3. 🧠 Choose your AI Agent CLI tool (`gemini`, `claude`, `aider`).
+4. 🚀 Auto-install the background daemon as an OS system service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
+
+---
+
+## 🔄 Two-Way Interactive Bridge
+
+With the interactive daemon running, your Telegram Bot becomes a full two-way command center:
+
+### 📱 Telegram Commands
+
+| Command | Action |
+| --- | --- |
+| `/projects` | Displays your most recently edited projects with inline buttons to switch workspace |
+| `/status` | Shows daemon health, active project, git branch, and running task status |
+| `/stop` | Aborts the currently executing task on your machine |
+| `/help` | Shows command guide and instructions |
+| *Any text message* | Executed immediately as a prompt by your AI Agent inside the active workspace |
+
+### 🟢 Interactive Approval Buttons
+
+When an AI Agent requests human feedback or approval, it sends interactive buttons directly to your Telegram chat:
+
+- 🟢 **Approve / موافق**
+- 🔴 **Reject / رفض**
+
+Tapping the button immediately sends your decision back to the running process.
+
+---
+
+## ⚙️ Background Daemon Service Management
+
+The daemon can run in the foreground or as a persistent system background service:
+
+```bash
+# Foreground run (useful for testing)
+npm run daemon
+
+# Install as background service (auto-starts on system boot)
+npm run service:install
+
+# Check background service status and logs
+npm run service:status
+
+# Stop and uninstall background service
+npm run service:uninstall
+
+# Restart background service
+npm run service:restart
+```
+
+### Supported Operating Systems
+
+- **macOS**: Configures a user `launchd` agent in `~/Library/LaunchAgents/com.telegram-notifier.daemon.plist`
+- **Linux**: Configures a user `systemd` unit in `~/.config/systemd/user/telegram-notifier.service`
+- **Windows**: Configures startup launcher in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
 
 ---
 
@@ -48,20 +120,6 @@ Please install and configure the telegram-notifier skill by running `npx skills 
 
 ---
 
-## 🌟 What the Setup Wizard Does
-
-When you run `npx github:alhinawi/telegram-notifier` or configure the skill:
-
-1. 🔑 **Telegram Bot Token**: Asks for your token from `@BotFather`.
-2. 🔍 **Auto-detect Chat ID**: Listens for `/start` sent to your bot and detects your Chat ID automatically.
-3. 🌐 **Language Preference**: Choose English (`en` - default), Egyptian Arabic (`ar-eg`), or Standard Arabic (`ar`).
-4. ⚙️ **Installation Scope**:
-   - **Global**: Automatically activates for all projects and AI agents on your machine.
-   - **Local**: Configures rules and skills inside the current repository.
-5. 🔔 **Live Test**: Sends an instant test notification to your phone to confirm everything is working!
-
----
-
 ## 🌐 Language Options & Presets
 
 You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar-eg|ar`) or specify `--lang` per call:
@@ -74,7 +132,7 @@ You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar-eg|ar`) o
 
 ---
 
-## ⚙️ How AI Agents Trigger It Automatically
+## ⚙️ How AI Agents Trigger Notifications
 
 ### 1. Antigravity & Gemini CLI
 
@@ -138,26 +196,9 @@ For iPhone (iOS) users, [TeamViewer](https://www.teamviewer.com/) provides a smo
 
 ---
 
-### 🔁 The Ultimate Mobile Remote Dev Workflow
-
-```mermaid
-graph LR
-    A[💻 Give AI Agent prompt on PC] --> B[☕ Walk away & relax]
-    B --> C[🤖 Agent finishes task]
-    C --> D[📱 Telegram alert on phone]
-    D --> E[📱 Open Parsec / TeamViewer on phone]
-    E --> F[🎮 Review code & give next prompt from phone!]
-```
-
-1. **Start Task**: Give your AI agent a task on your PC (e.g. "Build feature X and run test suite").
-2. **Step Away**: Leave your desk, grab coffee, or relax.
-3. **Get Notified**: Your phone receives a Telegram alert: `✅ [Task Finished] "Task Finished" (or "خلصت يا معلم")`.
-4. **Take Control**: Open **Parsec** (Android) or **TeamViewer** (iOS) on your phone, connect to your PC, inspect the results, approve code, or give the agent its next prompt!
-
----
-
 ## 🔒 Security Notice
 
+- **Strict Authorization**: The listener daemon checks every incoming message's Chat ID against `TELEGRAM_CHAT_ID`. Only you can trigger commands.
 - **Never commit `.env` to Git repositories.** `.gitignore` is pre-configured to protect your secrets.
 - Always keep your `TELEGRAM_BOT_TOKEN` private. If leaked, revoke it via `@BotFather` using `/revoke`.
 
