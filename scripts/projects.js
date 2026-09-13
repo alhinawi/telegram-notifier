@@ -13,11 +13,31 @@ const i18n = require('./i18n');
  * Expand ~ to user's home directory
  */
 function expandHome(p) {
+  if (!p) return p;
   if (p === '~') return os.homedir();
   if (p.startsWith('~/')) {
     return path.join(os.homedir(), p.slice(2));
   }
   return p;
+}
+
+/**
+ * Read custom workspace dirs stored in user state
+ */
+function getStoredWorkspaceDirs() {
+  try {
+    const homeDir = os.homedir();
+    const stateFile = path.join(homeDir, '.telegram-notifier', 'state.json');
+    if (fs.existsSync(stateFile)) {
+      const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      if (Array.isArray(data.workspaceDirs)) {
+        return data.workspaceDirs;
+      }
+    }
+  } catch {
+    // Ignore
+  }
+  return [];
 }
 
 /**
@@ -32,8 +52,10 @@ function getWorkspaceDirs() {
     .filter(Boolean)
     .map(expandHome);
 
+  const stored = getStoredWorkspaceDirs().map(expandHome);
+
   // Always ensure current working directory is included
-  const list = [...parsed, process.cwd()];
+  const list = [...parsed, ...stored, process.cwd()];
 
   const home = os.homedir();
   const defaults = [
@@ -198,11 +220,10 @@ function formatProjectsMessage(projects, activePath = '', lang = 'en') {
     return `${title}\n\n_${noneFound}_`;
   }
 
-  const numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
   const lines = [title, ''];
 
   projects.forEach((proj, index) => {
-    const num = numberEmojis[index] || `[${index + 1}]`;
+    const num = `[${index + 1}]`;
     const isActive = activePath && path.resolve(proj.path) === path.resolve(activePath);
     const activeBadge = isActive ? i18n.t('projects.active_badge', lang) : '';
     const timeAgo = formatTimeAgo(proj.mtime, lang);
@@ -220,13 +241,12 @@ function formatProjectsMessage(projects, activePath = '', lang = 'en') {
  * Build Telegram Inline Keyboard buttons for project selection
  */
 function buildProjectsKeyboard(projects, activePath = '') {
-  const numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
   const keyboard = [];
 
   projects.forEach((proj, index) => {
-    const num = numberEmojis[index] || `${index + 1}.`;
+    const num = `${index + 1}.`;
     const isActive = activePath && path.resolve(proj.path) === path.resolve(activePath);
-    const label = `${num} ${proj.name}${isActive ? ' 🟢' : ''}`;
+    const label = `${num} ${proj.name}${isActive ? ' (*)' : ''}`;
 
     keyboard.push([
       {
@@ -250,6 +270,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  expandHome,
   getWorkspaceDirs,
   discoverProjects,
   formatProjectsMessage,

@@ -143,7 +143,7 @@ WshShell.Run "cmd /c ""${nodeBinary}"" ""${scriptPath}"" >> ""${outLog}"" 2>> ""
 function installService() {
   ensureDirs();
   const platform = process.platform;
-  console.log(`\n⚙️ Detected Operating System: ${platform} (${os.type()} ${os.release()})`);
+  console.log(`\nDetected Operating System: ${platform} (${os.type()} ${os.release()})`);
 
   if (platform === 'darwin') {
     const plistPath = getMacPlistPath();
@@ -158,15 +158,15 @@ function installService() {
     }
 
     fs.writeFileSync(plistPath, generateMacPlist(), 'utf8');
-    console.log(`✅ Saved launchd configuration: ${plistPath}`);
+    console.log(`Saved launchd configuration: ${plistPath}`);
 
     try {
       execSync(`launchctl load -w "${plistPath}"`);
-      console.log(`🚀 Started macOS background service (${SERVICE_NAME}) successfully!`);
+      console.log(`Started macOS background service (${SERVICE_NAME}) successfully!`);
       console.log(`   It will now auto-start when you log in.`);
       return true;
     } catch (e) {
-      console.warn(`⚠️ Warning during launchctl load: ${e.message}`);
+      console.warn(`Warning during launchctl load: ${e.message}`);
       return false;
     }
   } else if (platform === 'linux') {
@@ -175,16 +175,16 @@ function installService() {
     if (!fs.existsSync(serviceDir)) fs.mkdirSync(serviceDir, { recursive: true });
 
     fs.writeFileSync(servicePath, generateLinuxService(), 'utf8');
-    console.log(`✅ Saved systemd user service configuration: ${servicePath}`);
+    console.log(`Saved systemd user service configuration: ${servicePath}`);
 
     try {
       execSync('systemctl --user daemon-reload');
       execSync(`systemctl --user enable --now ${LINUX_SERVICE_NAME}`);
-      console.log(`🚀 Started Linux user service (${LINUX_SERVICE_NAME}) successfully!`);
+      console.log(`Started Linux user service (${LINUX_SERVICE_NAME}) successfully!`);
       return true;
     } catch (e) {
-      console.warn(`⚠️ Could not auto-enable systemd service: ${e.message}`);
-      console.log(`👉 You can run: systemctl --user enable --now ${LINUX_SERVICE_NAME}`);
+      console.warn(`Could not auto-enable systemd service: ${e.message}`);
+      console.log(`You can run: systemctl --user enable --now ${LINUX_SERVICE_NAME}`);
       return false;
     }
   } else if (platform === 'win32') {
@@ -193,12 +193,12 @@ function installService() {
     if (!fs.existsSync(vbsDir)) fs.mkdirSync(vbsDir, { recursive: true });
 
     fs.writeFileSync(vbsPath, generateWindowsVbs(), 'utf8');
-    console.log(`✅ Saved Windows Startup launcher: ${vbsPath}`);
-    console.log(`🚀 Telegram Notifier Daemon will start automatically with Windows.`);
+    console.log(`Saved Windows Startup launcher: ${vbsPath}`);
+    console.log(`Telegram Notifier Daemon will start automatically with Windows.`);
     return true;
   } else {
-    console.warn(`⚠️ Service installation is not supported for platform: ${platform}`);
-    console.log(`👉 Run manually with: npm run daemon`);
+    console.warn(`Service installation is not supported for platform: ${platform}`);
+    console.log(`Run manually with: npm run daemon`);
     return false;
   }
 }
@@ -208,7 +208,7 @@ function installService() {
  */
 function uninstallService() {
   const platform = process.platform;
-  console.log(`\n🛑 Uninstalling background service for: ${platform}`);
+  console.log(`\nUninstalling background service for: ${platform}`);
 
   if (platform === 'darwin') {
     const plistPath = getMacPlistPath();
@@ -219,9 +219,9 @@ function uninstallService() {
         // Ignore
       }
       fs.unlinkSync(plistPath);
-      console.log(`🗑️ Removed ${plistPath}`);
+      console.log(`Removed ${plistPath}`);
     }
-    console.log(`✅ Background service stopped and removed.`);
+    console.log(`Background service stopped and removed.`);
     return true;
   } else if (platform === 'linux') {
     const servicePath = getLinuxServicePath();
@@ -233,22 +233,22 @@ function uninstallService() {
     }
     if (fs.existsSync(servicePath)) {
       fs.unlinkSync(servicePath);
-      console.log(`🗑️ Removed ${servicePath}`);
+      console.log(`Removed ${servicePath}`);
     }
     try {
       execSync('systemctl --user daemon-reload');
     } catch {
       // Ignore
     }
-    console.log(`✅ Service stopped and uninstalled.`);
+    console.log(`Service stopped and uninstalled.`);
     return true;
   } else if (platform === 'win32') {
     const vbsPath = getWindowsStartupPath();
     if (fs.existsSync(vbsPath)) {
       fs.unlinkSync(vbsPath);
-      console.log(`🗑️ Removed ${vbsPath}`);
+      console.log(`Removed ${vbsPath}`);
     }
-    console.log(`✅ Windows Startup launcher removed.`);
+    console.log(`Windows Startup launcher removed.`);
     return true;
   }
   return false;
@@ -260,29 +260,29 @@ function uninstallService() {
 function checkStatus() {
   const platform = process.platform;
   const { logDir } = getPaths();
-  console.log(`\n🔍 Checking background service status (${platform}):`);
+  console.log(`\nChecking background service status (${platform}):`);
 
   if (platform === 'darwin') {
     const plistPath = getMacPlistPath();
     const installed = fs.existsSync(plistPath);
-    console.log(`- Config file: ${installed ? '✅ Installed (' + plistPath + ')' : '❌ Not installed'}`);
+    console.log(`- Config file: ${installed ? 'Installed (' + plistPath + ')' : 'Not installed'}`);
 
     try {
       const list = execSync(`launchctl list | grep ${SERVICE_NAME} || true`).toString().trim();
       if (list) {
-        console.log(`- Status: 🟢 Running (launchd entry: ${list})`);
+        console.log(`- Status: Running (launchd entry: ${list})`);
       } else {
-        console.log(`- Status: ⚪ Loaded/Not currently running`);
+        console.log(`- Status: Loaded / Not currently running`);
       }
     } catch {
-      console.log(`- Status: ⚪ Unknown / Not running`);
+      console.log(`- Status: Unknown / Not running`);
     }
   } else if (platform === 'linux') {
     try {
       const status = execSync(`systemctl --user is-active ${LINUX_SERVICE_NAME} 2>/dev/null || echo inactive`).toString().trim();
-      console.log(`- Status: ${status === 'active' ? '🟢 Running' : '⚪ Inactive (' + status + ')'}`);
+      console.log(`- Status: ${status === 'active' ? 'Running' : 'Inactive (' + status + ')'}`);
     } catch {
-      console.log(`- Status: ⚪ Inactive`);
+      console.log(`- Status: Inactive`);
     }
   }
 

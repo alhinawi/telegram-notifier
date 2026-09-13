@@ -25,8 +25,8 @@ const ENV_PATH = path.join(ROOT_DIR, '.env');
 
 function printHeader() {
   console.log('\n========================================================');
-  console.log('🚀 Telegram Notifier - Interactive 1-Liner Setup Wizard');
-  console.log('   Universal AI Agent Notifications & Remote Setup');
+  console.log('Telegram Notifier - Interactive 1-Liner Setup Wizard');
+  console.log('Universal AI Agent Notifications & Remote Setup');
   console.log('========================================================\n');
 }
 
@@ -65,19 +65,19 @@ function saveEnv(envConfig, targetFile) {
     `NOTIFICATION_LANGUAGE=${envConfig.NOTIFICATION_LANGUAGE || 'en'}`,
     '',
     '# Two-Way Interactive Bridge Configuration',
-    `WORKSPACE_DIRS=${envConfig.WORKSPACE_DIRS || '~/workspace/personal,~/workspace'}`,
+    `WORKSPACE_DIRS=${envConfig.WORKSPACE_DIRS || '~/workspace'}`,
     `AI_AGENT_CLI=${envConfig.AI_AGENT_CLI || 'gemini'}`,
     `TASK_TIMEOUT=${envConfig.TASK_TIMEOUT || '600'}`,
     '',
   ];
   fs.writeFileSync(targetFile, lines.join('\n'), 'utf8');
-  console.log(`💾 Saved configuration to: ${targetFile}`);
+  console.log(`Saved configuration to: ${targetFile}`);
 }
 
 async function detectChatId(botToken) {
-  console.log('\n🔍 Auto-detecting Telegram Chat ID...');
-  console.log('👉 Please open Telegram, search for your bot, and send /start or any message.');
-  console.log('   Waiting for your message...\n');
+  console.log('\nAuto-detecting Telegram Chat ID...');
+  console.log('Please open Telegram, search for your bot, and send /start or any message.');
+  console.log('Waiting for your message...\n');
 
   for (let attempt = 1; attempt <= 15; attempt++) {
     try {
@@ -109,8 +109,8 @@ async function detectChatId(botToken) {
       });
 
       if (result) {
-        console.log(`✅ Message detected from ${result.sender}!`);
-        console.log(`🔑 Chat ID: ${result.chatId}`);
+        console.log(`Message detected from ${result.sender}!`);
+        console.log(`Chat ID: ${result.chatId}`);
         return result.chatId;
       }
     } catch (err) {
@@ -121,7 +121,7 @@ async function detectChatId(botToken) {
     await new Promise((r) => setTimeout(r, 3000));
   }
 
-  console.log('\n⚠️ Could not detect message automatically.');
+  console.log('\nCould not detect message automatically.');
   return null;
 }
 
@@ -131,10 +131,10 @@ function sendTestNotification(botToken, chatId, lang) {
     const message = i18n.t('setup.test_message', lang);
 
     const text = [
-      `✅ *[Telegram Notifier]* \`Installation\``,
+      `*[Telegram Notifier]* \`Installation\``,
       `*${title}*`,
       `\n${message}`,
-      `\n🕒 _${new Date().toLocaleString()}_`,
+      `\n_${new Date().toLocaleString()}_`,
     ].join('\n');
 
     const payload = JSON.stringify({
@@ -222,48 +222,10 @@ function installGlobalPlugin(envConfig) {
     // Save global .env
     saveEnv(envConfig, path.join(globalPluginDir, '.env'));
 
-    console.log(`🌐 Global plugin successfully installed to: ${globalPluginDir}`);
+    console.log(`Global plugin successfully installed to: ${globalPluginDir}`);
     return true;
   } catch (err) {
-    console.error(`⚠️ Could not install global plugin: ${err.message}`);
-    return false;
-  }
-}
-
-function installLocalProject(targetDir, envConfig) {
-  try {
-    const localPluginDir = path.join(targetDir, '.agents', 'skills', 'telegram-notifier');
-    fs.mkdirSync(localPluginDir, { recursive: true });
-
-    // Copy skill
-    const skillSrc = path.join(ROOT_DIR, 'skills', 'telegram-notifier', 'SKILL.md');
-    if (fs.existsSync(skillSrc)) {
-      fs.copyFileSync(skillSrc, path.join(localPluginDir, 'SKILL.md'));
-    }
-
-    // Copy scripts & locales
-    copyDir(path.join(ROOT_DIR, 'scripts'), path.join(localPluginDir, 'scripts'));
-    i18n.copyLocales(localPluginDir);
-
-    // Write local .env
-    saveEnv(envConfig, path.join(localPluginDir, '.env'));
-
-    // Create a local .cursorrules / .windsurfrules snippet
-    const ruleSnippet = [
-      '',
-      '# Telegram Notifier Auto-Trigger Rule',
-      'When completing any task, needing human approval, or encountering an error, automatically execute:',
-      `node ".agents/skills/telegram-notifier/scripts/notify.js" --type=task_finished`,
-      '',
-    ].join('\n');
-
-    const cursorRulesPath = path.join(targetDir, '.cursorrules');
-    fs.appendFileSync(cursorRulesPath, ruleSnippet, 'utf8');
-
-    console.log(`📁 Local project integration configured in: ${targetDir}`);
-    return true;
-  } catch (err) {
-    console.error(`⚠️ Could not add local integration: ${err.message}`);
+    console.error(`Could not install global plugin: ${err.message}`);
     return false;
   }
 }
@@ -283,18 +245,18 @@ async function main() {
   }
 
   while (!botToken || botToken === 'your_bot_token_here') {
-    console.log('📌 Enter your Telegram Bot Token from @BotFather (e.g. 1234567890:ABCdefGh...):');
+    console.log('Enter your Telegram Bot Token from @BotFather (e.g. 1234567890:ABCdefGh...):');
     const input = await ask('Bot Token: ');
     botToken = input.trim();
     if (!botToken) {
-      console.log('❌ Token cannot be empty. Please enter a valid token.');
+      console.log('Token cannot be empty. Please enter a valid token.');
     }
   }
 
   // 2. Chat ID
   let chatId = existingEnv.TELEGRAM_CHAT_ID || '';
   console.log('\n--------------------------------------------------------');
-  console.log('📌 Telegram Chat ID Setup:');
+  console.log('Telegram Chat ID Setup:');
   console.log('  [1] Auto-detect automatically via Telegram (Recommended)');
   console.log('  [2] Enter Chat ID manually');
   const chatChoice = await ask('Choose option [1/2] (Default: 1): ');
@@ -311,7 +273,7 @@ async function main() {
       }
 
       console.log('\n--------------------------------------------------------');
-      console.log('📌 What would you like to do?');
+      console.log('What would you like to do?');
       console.log('  [1] Try again (Retry auto-detection)');
       console.log('  [2] Enter Chat ID manually');
       console.log('  [3] Exit');
@@ -325,7 +287,7 @@ async function main() {
           break;
         }
         case '3':
-          console.log('\n👋 Setup cancelled. Exiting...');
+          console.log('\nSetup cancelled. Exiting...');
           rl.close();
           process.exit(0);
         default:
@@ -336,7 +298,7 @@ async function main() {
 
   // 3. Language Selection
   console.log('\n--------------------------------------------------------');
-  console.log('🌐 Choose Default Notification Language:');
+  console.log('Choose Default Notification Language:');
   const availableLangs = i18n.getAvailableLanguages();
   availableLangs.forEach((l, idx) => {
     console.log(`  [${idx + 1}] ${l.nativeName} (${l.name}) [${l.code}]`);
@@ -348,15 +310,20 @@ async function main() {
 
   // 4. Two-Way Interactive Bridge Configuration
   console.log('\n--------------------------------------------------------');
-  console.log('🔄 Two-Way Interactive Bridge Configuration:');
-  const defaultDirs = existingEnv.WORKSPACE_DIRS || '~/workspace/personal,~/workspace';
-  console.log(`📁 Project Workspaces to scan (comma-separated):`);
+  console.log('Two-Way Interactive Bridge Configuration:');
+  const defaultDirs = existingEnv.WORKSPACE_DIRS || '~/workspace';
+  console.log('Project Workspaces to scan (comma-separated):');
+  if (lang === 'ar') {
+    console.log('ملاحظة: كتابة المسارات تبدأ من مجلد المستخدم (~) أو المسار الكامل، مثل: ~/workspace');
+  } else {
+    console.log('Note: Paths should start from your Home directory (~) or full absolute path, e.g. ~/workspace');
+  }
   console.log(`   (Default: ${defaultDirs})`);
   const dirsInput = await ask('Workspace directories: ');
   const workspaceDirs = dirsInput.trim() || defaultDirs;
 
   const defaultAgent = existingEnv.AI_AGENT_CLI || 'gemini';
-  console.log(`\n🧠 AI Agent CLI tool (e.g. gemini, claude, aider):`);
+  console.log(`\nAI Agent CLI tool (e.g. gemini, claude, aider):`);
   console.log(`   (Default: ${defaultAgent})`);
   const agentInput = await ask('AI Agent CLI: ');
   const aiAgentCli = agentInput.trim() || defaultAgent;
@@ -375,46 +342,29 @@ async function main() {
     saveEnv(envConfig, ENV_PATH);
   }
 
-  // 5. Installation Scope
+  // 5. Installation Scope (Auto Global)
   console.log('\n--------------------------------------------------------');
-  console.log('⚙️ Installation Scope & Auto-Triggering:');
-  console.log('  [1] Global (Install globally for ALL projects & AI Agents automatically)');
-  console.log('  [2] Local Project only (Configure current directory)');
-  console.log('  [3] Both Global & Local');
-  console.log('  [4] Standalone (Only keep credentials here)');
-  const scopeChoice = await ask('Choose scope [1/2/3/4] (Default: 1): ');
-
-  const choice = scopeChoice.trim() || '1';
-  if (choice === '1' || choice === '3') {
-    installGlobalPlugin(envConfig);
-  }
-  if (choice === '2' || choice === '3') {
-    installLocalProject(process.cwd(), envConfig);
-  }
+  console.log('Installing plugin globally for all projects & AI Agents...');
+  installGlobalPlugin(envConfig);
 
   // 6. Test Notification
   console.log('\n--------------------------------------------------------');
-  console.log('🔔 Sending a test notification to your phone...');
+  console.log('Sending a test notification to your phone...');
   try {
     await sendTestNotification(botToken, chatId, lang);
-    console.log('🎉 Test notification delivered successfully! Check your Telegram.');
+    console.log('Test notification delivered successfully! Check your Telegram.');
   } catch (err) {
-    console.error(`❌ Failed to send test message: ${err.message}`);
+    console.error(`Failed to send test message: ${err.message}`);
   }
 
   // 7. Auto-start Background Service Setup
   console.log('\n--------------------------------------------------------');
-  console.log('🚀 Background Daemon Service (Two-Way Interactive Bridge):');
-  console.log('  [1] Install & auto-start as OS background service (Recommended)');
-  console.log('  [2] Skip for now (Run manually when needed via `npm run daemon`)');
-  const serviceChoice = await ask('Choose option [1/2] (Default: 1): ');
-
-  if ((serviceChoice.trim() || '1') === '1') {
-    serviceManager.installService();
-  }
+  console.log('Background Daemon Service (Two-Way Interactive Bridge):');
+  console.log('Installing and auto-starting OS background service automatically...');
+  serviceManager.installService();
 
   console.log('\n========================================================');
-  console.log('✅ Setup Complete! Your AI Agents will now notify your phone automatically.');
+  console.log('Setup Complete! Your AI Agents will now notify your phone automatically.');
   console.log('========================================================\n');
 
   rl.close();

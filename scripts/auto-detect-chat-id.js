@@ -47,8 +47,8 @@ https.get(`https://api.telegram.org/bot${botToken}/getUpdates`, (res) => {
 
       const updates = json.result || [];
       if (updates.length === 0) {
-        console.log('⚠️ No recent messages found yet.');
-        console.log('👉 Please open Telegram, search for your bot, send /start or any message, then re-run this command:');
+        console.log('No recent messages found yet.');
+        console.log('Please open Telegram, search for your bot, send /start or any message, then re-run this command:');
         console.log('   npm run detect-chat-id');
         process.exit(2);
       }
@@ -63,8 +63,8 @@ https.get(`https://api.telegram.org/bot${botToken}/getUpdates`, (res) => {
 
       const chatId = msg.chat.id.toString();
       const sender = msg.from ? `${msg.from.first_name || ''} (@${msg.from.username || 'unknown'})` : 'User';
-      console.log(`✅ Detected message from ${sender}!`);
-      console.log(`🔑 Chat ID: ${chatId}`);
+      console.log(`Detected message from ${sender}!`);
+      console.log(`Chat ID: ${chatId}`);
 
       // Update .env
       let content = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
@@ -74,7 +74,7 @@ https.get(`https://api.telegram.org/bot${botToken}/getUpdates`, (res) => {
         content += `\nTELEGRAM_CHAT_ID=${chatId}\n`;
       }
       fs.writeFileSync(envPath, content, 'utf8');
-      console.log(`🎉 Successfully updated TELEGRAM_CHAT_ID in ${envPath}`);
+      console.log(`Successfully updated TELEGRAM_CHAT_ID in ${envPath}`);
     } catch (e) {
       console.error('Error processing updates:', e.message);
       process.exit(1);

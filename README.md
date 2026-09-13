@@ -7,25 +7,25 @@ Universal **Telegram notification & interactive control bridge** for AI coding a
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as 📱 You (Telegram)
-    participant Bot as 🤖 Listener Daemon (Background Service)
-    participant Agent as 🧠 AI Coding Agent (Gemini / Claude / Aider)
-    
+    actor User as You (Telegram)
+    participant Bot as Listener Daemon (Background Service)
+    participant Agent as AI Coding Agent (Gemini / Claude / Aider)
+
     User->>Bot: /projects
-    Bot->>User: 📂 Displays Recent Projects with Inline Buttons
+    Bot->>User: Displays Recent Projects with Inline Buttons
     User->>Bot: Taps project button (Switch Workspace)
-    Bot->>User: ✅ Switched to selected project
+    Bot->>User: Switched to selected project
     User->>Bot: Sends prompt: "Fix the login authentication bug"
-    Bot->>User: ⏳ "Starting task in project..."
+    Bot->>User: "Starting task in project..."
     Bot->>Agent: Runs CLI agent in active workspace
     Agent->>Agent: Executes code / runs tests
     Agent->>Bot: Completes task with output
-    Bot->>User: 📱 Result notification: "Task Finished Successfully ✅"
+    Bot->>User: Result notification: "Task Finished Successfully"
 ```
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 Install via skills CLI:
 
@@ -41,14 +41,14 @@ npx github:alhinawi/telegram-notifier
 
 During setup, the wizard will:
 
-1. 🔑 Connect your Telegram Bot Token & auto-detect your Chat ID.
-2. 📁 Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
-3. 🧠 Choose your AI Agent CLI tool (`gemini`, `claude`, `aider`).
-4. 🚀 Auto-install the background daemon as an OS system service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
+1. Connect your Telegram Bot Token & auto-detect your Chat ID.
+2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
+3. Choose your AI Agent CLI tool (`gemini`, `claude`, `aider`).
+4. Auto-install the background daemon as an OS system service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
 
 ---
 
-## 🆙 How to Update (For Existing Users / للمستخدمين الحاليين)
+## How to Update (For Existing Users / للمستخدمين الحاليين)
 
 If you previously installed **telegram-notifier** and want to upgrade to the latest **Two-Way Control Bridge** features without re-entering your Bot credentials:
 
@@ -60,7 +60,7 @@ Run from any terminal:
 npx github:alhinawi/telegram-notifier
 ```
 
-> 💡 **Auto-Migration**: The setup wizard automatically detects your existing `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, preserves them, and only prompts you for the new features (project folders and background service).
+> **Auto-Migration**: The setup wizard automatically detects your existing `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, preserves them, and only prompts you for the new features (project folders and background service).
 
 ### Option 2: Update via Skills CLI
 
@@ -71,11 +71,13 @@ npx skills add alhinawi/telegram-notifier
 ### Option 3: Update via 1-Liner Script
 
 - **macOS / Linux**:
+
   ```bash
   curl -fsSL https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.sh | bash
   ```
 
 - **Windows (PowerShell)**:
+
   ```powershell
   irm https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.ps1 | iex
   ```
@@ -85,43 +87,49 @@ npx skills add alhinawi/telegram-notifier
 Copy and paste this prompt to your AI Assistant (Cursor, Claude Code, Antigravity, Windsurf):
 
 - **English**:
+
   ```text
   Please update the telegram-notifier plugin to the latest version from GitHub and configure the Two-Way Bridge background service.
   ```
 
 - **العربية**:
+
   ```text
   من فضلك حدّث مهارة telegram-notifier إلى آخر إصدار من GitHub وفعّل خدمة جسر التحكم التفاعلي في الخلفية (Two-Way Bridge).
   ```
 
 ---
 
-## 🔄 Two-Way Interactive Bridge
+## Two-Way Interactive Bridge
 
 With the interactive daemon running, your Telegram Bot becomes a full two-way command center:
 
-### 📱 Telegram Commands
+### Telegram Commands
 
-| Command | Action |
-| --- | --- |
-| `/projects` | Displays your most recently edited projects with inline buttons to switch workspace |
-| `/status` | Shows daemon health, active project, git branch, and running task status |
-| `/stop` | Aborts the currently executing task on your machine |
-| `/help` | Shows command guide and instructions |
-| *Any text message* | Executed immediately as a prompt by your AI Agent inside the active workspace |
+| Command            | Action                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `/projects`        | Displays your most recently edited projects with inline buttons to switch workspace      |
+| `/cd <path/name>`  | Switch active project directory directly (supports `~`, relative paths, or project name) |
+| `/dirs`            | View scanned workspace roots and active directory                                        |
+| `/add_dir <path>`  | Add a new root directory for project scanning                                            |
+| `/language`        | Switch notification and bot language via clickable interactive list                      |
+| `/status`          | Shows daemon health, active project, git branch, and running task status                 |
+| `/stop`            | Aborts the currently executing task on your machine                                      |
+| `/help`            | Shows command guide and instructions                                                     |
+| _Any text message_ | Executed immediately as a prompt by your AI Agent inside the active workspace            |
 
-### 🟢 Interactive Approval Buttons
+### Interactive Approval Buttons
 
 When an AI Agent requests human feedback or approval, it sends interactive buttons directly to your Telegram chat:
 
-- 🟢 **Approve / موافق**
-- 🔴 **Reject / رفض**
+- **Approve / موافق**
+- **Reject / رفض**
 
 Tapping the button immediately sends your decision back to the running process.
 
 ---
 
-## ⚙️ Background Daemon Service Management
+## Background Daemon Service Management
 
 The daemon can run in the foreground or as a persistent system background service:
 
@@ -150,17 +158,17 @@ npm run service:restart
 
 ---
 
-## 🤖 1-Click Prompt for AI Agents
+## 1-Click Prompt for AI Agents
 
 Give this prompt to your AI Agent (Antigravity, Claude Code, Cursor, Windsurf, Copilot) to install and configure everything automatically:
 
-### 🇬🇧 English Prompt
+### English Prompt
 
 ```text
 Please install and configure the telegram-notifier skill by running `npx skills add alhinawi/telegram-notifier` (or via https://github.com/alhinawi/telegram-notifier). Follow the setup instructions to configure the bot token and chat ID, and make sure to automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
 ```
 
-### 🇪🇬 Arabic Prompt (برومبت بالعربي)
+### Arabic Prompt (برومبت بالعربي)
 
 ```text
 من فضلك قم بتثبيت وإعداد مهارة telegram-notifier عبر تشغيل الأمر `npx skills add alhinawi/telegram-notifier` (أو من المستودع https://github.com/alhinawi/telegram-notifier). اتبع خطوات الإعداد لربط الـ Bot Token والـ Chat ID، واحرص على إرسال إشعار تليجرام تلقائياً في كل مرة تنتهي فيها من مهمة، أو تحتاج إذني وموافقتي، أو عند حدوث أي خطأ بدون أن أحتاج لتشغيلها يدوياً.
@@ -168,19 +176,19 @@ Please install and configure the telegram-notifier skill by running `npx skills 
 
 ---
 
-## 🌐 Language Options & Presets
+## Language Options & Presets
 
 You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or specify `--lang` per call:
 
-| Event Type | English (`en`) | Arabic (`ar`) |
-| --- | --- | --- |
-| `--type=task_finished` | `Task Finished` | `اكتملت المهمة بنجاح` |
-| `--type=approval_required` | `Approval Required` | `مطلوب مراجعة وتأكيد` |
-| `--type=error` | `Error Occurred` | `حدث خطأ أثناء التنفيذ` |
+| Event Type                 | English (`en`)      | Arabic (`ar`)           |
+| -------------------------- | ------------------- | ----------------------- |
+| `--type=task_finished`     | `Task Finished`     | `اكتملت المهمة بنجاح`   |
+| `--type=approval_required` | `Approval Required` | `مطلوب مراجعة وتأكيد`   |
+| `--type=error`             | `Error Occurred`    | `حدث خطأ أثناء التنفيذ` |
 
 ---
 
-## ⚙️ How AI Agents Trigger Notifications
+## How AI Agents Trigger Notifications
 
 ### 1. Antigravity & Gemini CLI
 
@@ -206,7 +214,7 @@ Execute `node /path/to/telegram-notifier/scripts/notify.js --type=task_finished`
 
 ---
 
-## 💻 Remote Desktop & Mobile Control Guide (التحكم في الكمبيوتر من الموبايل)
+## Remote Desktop & Mobile Control Guide (التحكم في الكمبيوتر من الموبايل)
 
 ### Option 1: Parsec (Recommended for Android / PC / Mac)
 
@@ -244,7 +252,7 @@ For iPhone (iOS) users, [TeamViewer](https://www.teamviewer.com/) provides a smo
 
 ---
 
-## 🔒 Security Notice
+## Security Notice
 
 - **Strict Authorization**: The listener daemon checks every incoming message's Chat ID against `TELEGRAM_CHAT_ID`. Only you can trigger commands.
 - **Never commit `.env` to Git repositories.** `.gitignore` is pre-configured to protect your secrets.
@@ -252,6 +260,6 @@ For iPhone (iOS) users, [TeamViewer](https://www.teamviewer.com/) provides a smo
 
 ---
 
-## 📄 License
+## License
 
 This project is open-source and available under the [MIT License](LICENSE).
