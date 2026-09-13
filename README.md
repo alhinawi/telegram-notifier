@@ -1,6 +1,6 @@
 # telegram-notifier
 
-▲ **Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
+**Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
 
 Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
 
@@ -112,6 +112,7 @@ With the interactive daemon running, your Telegram Bot becomes a full two-way co
 | `/cd <path/name>`  | Switch active project directory directly (supports `~`, relative paths, or project name) |
 | `/dirs`            | View scanned workspace roots and active directory                                        |
 | `/add_dir <path>`  | Add a new root directory for project scanning                                            |
+| `/del_dir <path>`  | Remove a root directory from project scanning                                            |
 | `/language`        | Switch notification and bot language via clickable interactive list                      |
 | `/status`          | Shows daemon health, active project, git branch, and running task status                 |
 | `/stop`            | Aborts the currently executing task on your machine                                      |
@@ -190,22 +191,26 @@ You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or spec
 
 ## How AI Agents Trigger Notifications
 
-### 1. Antigravity & Gemini CLI
+### 1. Installed via Skills CLI (Recommended)
 
-Installed globally in `~/.gemini/config/plugins/telegram-notifier/` or locally in `.agents/skills/telegram-notifier/`. The agent detects the skill and triggers it automatically.
+When installed via `npx skills add alhinawi/telegram-notifier`, your AI Agent (Cursor, Claude Code, Antigravity, Windsurf) automatically discovers the skill from `SKILL.md` and triggers notifications without manual configuration.
 
-### 2. Claude Code
+### 2. Antigravity & Gemini CLI
 
-Add to `.claude/skills/telegram-notifier/SKILL.md` or instruct in `CLAUDE.md`:
+Installed globally via `npm run setup` in `~/.gemini/config/plugins/telegram-notifier/` or via `npx skills add alhinawi/telegram-notifier -g`. The agent detects the skill and triggers it automatically.
+
+### 3. Claude Code
+
+Install via `npx skills add alhinawi/telegram-notifier -a claude-code` or instruct in `CLAUDE.md`:
 
 ```markdown
-When you finish a task, need approval, or encounter an error, automatically run:
-node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"
+When completing any task, needing human approval, or encountering an error:
+Execute `node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"`
 ```
 
-### 3. Cursor & Windsurf
+### 4. Cursor & Windsurf
 
-Add to `.cursorrules` or `.windsurfrules`:
+Install via `npx skills add alhinawi/telegram-notifier` or add to `.cursorrules` / `.windsurfrules`:
 
 ```markdown
 When completing any task, needing human approval, or encountering an error:
