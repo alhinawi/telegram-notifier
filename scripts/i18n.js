@@ -11,7 +11,6 @@ function findLocalesDir() {
 	const candidates = [
 		path.resolve(__dirname, "..", "locales"),
 		path.resolve(__dirname, "locales"),
-		path.resolve(__dirname, "..", "skills", "telegram-notifier", "locales"),
 		path.join(
 			os.homedir(),
 			".gemini",

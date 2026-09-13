@@ -201,7 +201,7 @@ function installGlobalPlugin(envConfig) {
     fs.mkdirSync(globalPluginDir, { recursive: true });
 
     // Copy package metadata
-    const filesToCopy = ['package.json', 'plugin.json', 'README.md', 'LICENSE', '.env.example'];
+    const filesToCopy = ['package.json', 'plugin.json', 'README.md', 'LICENSE', '.env.example', 'SKILL.md'];
     filesToCopy.forEach((f) => {
       const src = path.join(ROOT_DIR, f);
       if (fs.existsSync(src)) fs.copyFileSync(src, path.join(globalPluginDir, f));
@@ -211,10 +211,10 @@ function installGlobalPlugin(envConfig) {
     copyDir(path.join(ROOT_DIR, 'scripts'), path.join(globalPluginDir, 'scripts'));
     i18n.copyLocales(globalPluginDir);
 
-    // Copy skills
+    // Copy skill for plugin discovery
     const targetSkills = path.join(globalPluginDir, 'skills', 'telegram-notifier');
     fs.mkdirSync(targetSkills, { recursive: true });
-    const skillSrc = path.join(ROOT_DIR, 'skills', 'telegram-notifier', 'SKILL.md');
+    const skillSrc = path.join(ROOT_DIR, 'SKILL.md');
     if (fs.existsSync(skillSrc)) {
       fs.copyFileSync(skillSrc, path.join(targetSkills, 'SKILL.md'));
     }
