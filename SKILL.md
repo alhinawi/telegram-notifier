@@ -47,11 +47,11 @@ The interactive listener daemon allows you to send prompts and manage projects f
 
 The notification defaults to Arabic (`ar`) or English (`en`):
 
-| Event Type | Flag | English | Arabic (`ar`) |
-| --- | --- | --- | --- |
-| Task finished | `--type="task_finished"` | `"Task Finished"` | `"اكتملت المهمة بنجاح"` |
-| Approval needed | `--type="approval_required"` | `"Approval Required"` | `"مطلوب مراجعة وتأكيد"` |
-| Error occurred | `--type="error"` | `"Error Occurred"` | `"حدث خطأ أثناء التنفيذ"` |
+| Event Type      | Flag                         | English               | Arabic (`ar`)             |
+| --------------- | ---------------------------- | --------------------- | ------------------------- |
+| Task finished   | `--type="task_finished"`     | `"Task Finished"`     | `"اكتملت المهمة بنجاح"`   |
+| Approval needed | `--type="approval_required"` | `"Approval Required"` | `"مطلوب مراجعة وتأكيد"`   |
+| Error occurred  | `--type="error"`             | `"Error Occurred"`    | `"حدث خطأ أثناء التنفيذ"` |
 
 ## Execution Syntax
 
@@ -69,7 +69,7 @@ node scripts/notify.js --type="task_finished" --message="Completed task successf
 node scripts/notify.js --type="approval_required" --message="Waiting for your review on the implementation plan." --project="<project-name>"
 ```
 
-*(Automatically renders [Approve] and [Reject] inline buttons on Telegram).*
+_(Automatically renders [Approve] and [Reject] inline buttons on Telegram)._
 
 ### 3. Error Occurred
 

@@ -156,11 +156,17 @@ function formatFileSize(bytes) {
 async function registerBotCommands(client, activeLang = "ar") {
 	function getCommandsForLang(langCode) {
 		return [
-			{ command: "projects", description: i18n.t("commands.projects", langCode) },
+			{
+				command: "projects",
+				description: i18n.t("commands.projects", langCode),
+			},
 			{ command: "cd", description: i18n.t("commands.cd", langCode) },
 			{ command: "ls", description: i18n.t("commands.ls", langCode) },
 			{ command: "dirs", description: i18n.t("commands.dirs", langCode) },
-			{ command: "language", description: i18n.t("commands.language", langCode) },
+			{
+				command: "language",
+				description: i18n.t("commands.language", langCode),
+			},
 			{ command: "status", description: i18n.t("commands.status", langCode) },
 			{ command: "stop", description: i18n.t("commands.stop", langCode) },
 			{ command: "help", description: i18n.t("commands.help", langCode) },
@@ -528,20 +534,21 @@ async function handleMessage(
 			dirs.sort((a, b) => a.localeCompare(b));
 			files.sort((a, b) => a.localeCompare(b));
 
-			const lines = [
-				i18n.t("daemon.ls_title", lang, { path: targetDir }),
-				"",
-			];
+			const lines = [i18n.t("daemon.ls_title", lang, { path: targetDir }), ""];
 
 			if (dirs.length > 0) {
-				lines.push(i18n.t("daemon.ls_dirs_header", lang, { count: dirs.length }));
+				lines.push(
+					i18n.t("daemon.ls_dirs_header", lang, { count: dirs.length }),
+				);
 				dirs.slice(0, 30).forEach((d) => lines.push(`• \`${d}\``));
 				if (dirs.length > 30) lines.push(`_... (+${dirs.length - 30})_`);
 				lines.push("");
 			}
 
 			if (files.length > 0) {
-				lines.push(i18n.t("daemon.ls_files_header", lang, { count: files.length }));
+				lines.push(
+					i18n.t("daemon.ls_files_header", lang, { count: files.length }),
+				);
 				files.slice(0, 40).forEach((f) => lines.push(`• \`${f}\``));
 				if (files.length > 40) lines.push(`_... (+${files.length - 40})_`);
 			}

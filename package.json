@@ -1,37 +1,38 @@
 {
-  "name": "telegram-notifier",
-  "version": "1.1.0",
-  "description": "Universal Telegram Notifier for AI Agents (Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, CI/CD, Git Hooks)",
-  "main": "scripts/notify.js",
-  "bin": {
-    "telegram-notifier": "scripts/setup.js",
-    "agent-notify": "scripts/notify.js",
-    "telegram-listener": "scripts/listener.js"
-  },
-  "scripts": {
-    "postinstall": "node scripts/setup.js",
-    "setup": "node scripts/setup.js",
-    "notify": "node scripts/notify.js",
-    "detect-chat-id": "node scripts/auto-detect-chat-id.js",
-    "daemon": "node scripts/listener.js",
-    "projects": "node scripts/projects.js",
-    "service:install": "node scripts/service-manager.js install",
-    "service:uninstall": "node scripts/service-manager.js uninstall",
-    "service:status": "node scripts/service-manager.js status",
-    "service:restart": "node scripts/service-manager.js restart"
-  },
-  "keywords": [
-    "telegram",
-    "notification",
-    "ai-agent",
-    "antigravity",
-    "claude-code",
-    "cursor",
-    "windsurf",
-    "gemini",
-    "parsec",
-    "remote-dev"
-  ],
-  "author": "Mohamed Alhinawi",
-  "license": "MIT"
+	"name": "telegram-notifier",
+	"version": "1.1.0",
+	"description": "Universal Telegram Notifier for AI Agents (Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, CI/CD, Git Hooks)",
+	"main": "scripts/notify.js",
+	"bin": {
+		"telegram-notifier": "scripts/setup.js",
+		"agent-notify": "scripts/notify.js",
+		"telegram-listener": "scripts/listener.js"
+	},
+	"scripts": {
+		"postinstall": "node scripts/setup.js",
+		"setup": "node scripts/setup.js",
+		"notify": "node scripts/notify.js",
+		"detect-chat-id": "node scripts/auto-detect-chat-id.js",
+		"daemon": "node scripts/listener.js",
+		"projects": "node scripts/projects.js",
+		"service:install": "node scripts/service-manager.js install",
+		"service:uninstall": "node scripts/service-manager.js uninstall",
+		"service:status": "node scripts/service-manager.js status",
+		"service:restart": "node scripts/service-manager.js restart",
+		"format": "npx prettier . --write"
+	},
+	"keywords": [
+		"telegram",
+		"notification",
+		"ai-agent",
+		"antigravity",
+		"claude-code",
+		"cursor",
+		"windsurf",
+		"gemini",
+		"parsec",
+		"remote-dev"
+	],
+	"author": "Mohamed Alhinawi",
+	"license": "MIT"
 }
