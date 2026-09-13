@@ -1,6 +1,6 @@
 # telegram-notifier
 
-▲ **Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
+**Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
 
 Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
 
@@ -27,76 +27,34 @@ sequenceDiagram
 
 ## Quick Start
 
-Install via skills CLI:
+Install the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf):
 
 ```bash
 npx skills add alhinawi/telegram-notifier
 ```
 
-Or run the interactive setup wizard: (Recommended)
+After installation, run the interactive setup wizard once to link your Telegram Bot and start the background service:
 
 ```bash
-npx github:alhinawi/telegram-notifier
+npm run setup
 ```
 
-During setup, the wizard will:
+The wizard will:
 
-1. Connect your Telegram Bot Token & auto-detect your Chat ID.
+1. Connect your Telegram Bot Token and auto-detect your Chat ID.
 2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
-3. Choose your AI Agent CLI tool (`gemini`, `claude`, `aider`).
-4. Auto-install the background daemon as an OS system service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
+3. Set your preferred AI Agent CLI tool (`gemini`, `claude`, `aider`).
+4. Auto-install and start the background daemon service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
 
 ---
 
-## How to Update (For Existing Users / للمستخدمين الحاليين)
+## How to Update
 
-If you previously installed **telegram-notifier** and want to upgrade to the latest **Two-Way Control Bridge** features without re-entering your Bot credentials:
-
-### Option 1: 1-Click Update (Recommended)
-
-Run from any terminal:
+To update the skill to the latest version at any time:
 
 ```bash
-npx github:alhinawi/telegram-notifier
+npx skills update telegram-notifier
 ```
-
-> **Auto-Migration**: The setup wizard automatically detects your existing `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, preserves them, and only prompts you for the new features (project folders and background service).
-
-### Option 2: Update via Skills CLI
-
-```bash
-npx skills add alhinawi/telegram-notifier
-```
-
-### Option 3: Update via 1-Liner Script
-
-- **macOS / Linux**:
-
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.sh | bash
-  ```
-
-- **Windows (PowerShell)**:
-
-  ```powershell
-  irm https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.ps1 | iex
-  ```
-
-### Option 4: Prompt Your AI Agent to Update
-
-Copy and paste this prompt to your AI Assistant (Cursor, Claude Code, Antigravity, Windsurf):
-
-- **English**:
-
-  ```text
-  Please update the telegram-notifier plugin to the latest version from GitHub and configure the Two-Way Bridge background service.
-  ```
-
-- **العربية**:
-
-  ```text
-  من فضلك حدّث مهارة telegram-notifier إلى آخر إصدار من GitHub وفعّل خدمة جسر التحكم التفاعلي في الخلفية (Two-Way Bridge).
-  ```
 
 ---
 
@@ -112,6 +70,7 @@ With the interactive daemon running, your Telegram Bot becomes a full two-way co
 | `/cd <path/name>`  | Switch active project directory directly (supports `~`, relative paths, or project name) |
 | `/dirs`            | View scanned workspace roots and active directory                                        |
 | `/add_dir <path>`  | Add a new root directory for project scanning                                            |
+| `/del_dir <path>`  | Remove a root directory from project scanning                                            |
 | `/language`        | Switch notification and bot language via clickable interactive list                      |
 | `/status`          | Shows daemon health, active project, git branch, and running task status                 |
 | `/stop`            | Aborts the currently executing task on your machine                                      |
@@ -190,22 +149,26 @@ You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or spec
 
 ## How AI Agents Trigger Notifications
 
-### 1. Antigravity & Gemini CLI
+### 1. Installed via Skills CLI (Recommended)
 
-Installed globally in `~/.gemini/config/plugins/telegram-notifier/` or locally in `.agents/skills/telegram-notifier/`. The agent detects the skill and triggers it automatically.
+When installed via `npx skills add alhinawi/telegram-notifier`, your AI Agent (Cursor, Claude Code, Antigravity, Windsurf) automatically discovers the skill from `SKILL.md` and triggers notifications without manual configuration.
 
-### 2. Claude Code
+### 2. Antigravity & Gemini CLI
 
-Add to `.claude/skills/telegram-notifier/SKILL.md` or instruct in `CLAUDE.md`:
+Installed globally via `npm run setup` in `~/.gemini/config/plugins/telegram-notifier/` or via `npx skills add alhinawi/telegram-notifier -g`. The agent detects the skill and triggers it automatically.
+
+### 3. Claude Code
+
+Install via `npx skills add alhinawi/telegram-notifier -a claude-code` or instruct in `CLAUDE.md`:
 
 ```markdown
-When you finish a task, need approval, or encounter an error, automatically run:
-node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"
+When completing any task, needing human approval, or encountering an error:
+Execute `node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"`
 ```
 
-### 3. Cursor & Windsurf
+### 4. Cursor & Windsurf
 
-Add to `.cursorrules` or `.windsurfrules`:
+Install via `npx skills add alhinawi/telegram-notifier` or add to `.cursorrules` / `.windsurfrules`:
 
 ```markdown
 When completing any task, needing human approval, or encountering an error:
