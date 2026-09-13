@@ -11,6 +11,7 @@ const https = require('https');
 const readline = require('readline');
 const os = require('os');
 const serviceManager = require('./service-manager');
+const i18n = require('./i18n');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -126,15 +127,8 @@ async function detectChatId(botToken) {
 
 function sendTestNotification(botToken, chatId, lang) {
   return new Promise((resolve, reject) => {
-    let title = 'Setup Successful! 🚀';
-    let message = 'Your Telegram Notifier is now fully connected and ready for AI Agent workflows.';
-    if (lang === 'ar-eg') {
-      title = 'مبروك يا معلم! تم الربط بنجاح 🚀';
-      message = 'أداة الإشعارات جاهزة الآن وهتبعتلك أول ما أي Agent يخلص شغل.';
-    } else if (lang === 'ar') {
-      title = 'تم الإعداد بنجاح! 🚀';
-      message = 'أداة التنبيهات متصلة الآن وجاهزة للعمل مع المساعدين الأذكياء.';
-    }
+    const title = i18n.t('setup.test_title', lang);
+    const message = i18n.t('setup.test_message', lang);
 
     const text = [
       `✅ *[Telegram Notifier]* \`Installation\``,
@@ -185,6 +179,21 @@ function sendTestNotification(botToken, chatId, lang) {
   });
 }
 
+function copyDir(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return;
+  fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir);
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry);
+    const destPath = path.join(destDir, entry);
+    if (fs.statSync(srcPath).isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
 function installGlobalPlugin(envConfig) {
   try {
     const homeDir = os.homedir();
@@ -198,14 +207,9 @@ function installGlobalPlugin(envConfig) {
       if (fs.existsSync(src)) fs.copyFileSync(src, path.join(globalPluginDir, f));
     });
 
-    // Copy scripts
-    const targetScripts = path.join(globalPluginDir, 'scripts');
-    fs.mkdirSync(targetScripts, { recursive: true });
-    if (fs.existsSync(path.join(ROOT_DIR, 'scripts'))) {
-      fs.readdirSync(path.join(ROOT_DIR, 'scripts')).forEach((s) => {
-        fs.copyFileSync(path.join(ROOT_DIR, 'scripts', s), path.join(targetScripts, s));
-      });
-    }
+    // Copy scripts & locales
+    copyDir(path.join(ROOT_DIR, 'scripts'), path.join(globalPluginDir, 'scripts'));
+    i18n.copyLocales(globalPluginDir);
 
     // Copy skills
     const targetSkills = path.join(globalPluginDir, 'skills', 'telegram-notifier');
@@ -229,8 +233,7 @@ function installGlobalPlugin(envConfig) {
 function installLocalProject(targetDir, envConfig) {
   try {
     const localPluginDir = path.join(targetDir, '.agents', 'skills', 'telegram-notifier');
-    const localScriptsDir = path.join(localPluginDir, 'scripts');
-    fs.mkdirSync(localScriptsDir, { recursive: true });
+    fs.mkdirSync(localPluginDir, { recursive: true });
 
     // Copy skill
     const skillSrc = path.join(ROOT_DIR, 'skills', 'telegram-notifier', 'SKILL.md');
@@ -238,11 +241,9 @@ function installLocalProject(targetDir, envConfig) {
       fs.copyFileSync(skillSrc, path.join(localPluginDir, 'SKILL.md'));
     }
 
-    // Copy notify scripts
-    const notifyJsSrc = path.join(ROOT_DIR, 'scripts', 'notify.js');
-    if (fs.existsSync(notifyJsSrc)) {
-      fs.copyFileSync(notifyJsSrc, path.join(localScriptsDir, 'notify.js'));
-    }
+    // Copy scripts & locales
+    copyDir(path.join(ROOT_DIR, 'scripts'), path.join(localPluginDir, 'scripts'));
+    i18n.copyLocales(localPluginDir);
 
     // Write local .env
     saveEnv(envConfig, path.join(localPluginDir, '.env'));
@@ -336,14 +337,14 @@ async function main() {
   // 3. Language Selection
   console.log('\n--------------------------------------------------------');
   console.log('🌐 Choose Default Notification Language:');
-  console.log('  [1] English (Default - "Task Finished", "Approval Required")');
-  console.log('  [2] Egyptian Arabic ("خلصت يا معلم", "محتاج اذنك يا معلم")');
-  console.log('  [3] Standard Arabic ("اكتملت المهمة", "مطلوب الموافقة")');
-  const langChoice = await ask('Choose language [1/2/3] (Default: 1): ');
+  const availableLangs = i18n.getAvailableLanguages();
+  availableLangs.forEach((l, idx) => {
+    console.log(`  [${idx + 1}] ${l.nativeName} (${l.name}) [${l.code}]`);
+  });
+  const langChoice = await ask(`Choose language [1-${availableLangs.length}] (Default: 1): `);
 
-  let lang = 'en';
-  if (langChoice.trim() === '2') lang = 'ar-eg';
-  else if (langChoice.trim() === '3') lang = 'ar';
+  const choiceIdx = parseInt(langChoice.trim(), 10) - 1;
+  const lang = (availableLangs[choiceIdx] && availableLangs[choiceIdx].code) || 'en';
 
   // 4. Two-Way Interactive Bridge Configuration
   console.log('\n--------------------------------------------------------');

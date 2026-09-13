@@ -13,6 +13,7 @@ const os = require('os');
 const { spawn } = require('child_process');
 const { loadEnv, TelegramClient } = require('./telegram-api');
 const { discoverProjects, formatProjectsMessage, buildProjectsKeyboard, getGitBranch } = require('./projects');
+const i18n = require('./i18n');
 
 function getStateDir() {
   const homeDir = os.homedir();
@@ -69,9 +70,6 @@ let runningProcess = null;
 let runningTaskInfo = null;
 let isStopping = false;
 
-// Pending approval promises / callbacks
-const pendingApprovals = new Map();
-
 function getActiveWorkspace(state) {
   if (state.activeWorkspace && fs.existsSync(state.activeWorkspace)) {
     return state.activeWorkspace;
@@ -105,8 +103,7 @@ async function main() {
   const authorizedChatId = String(env.TELEGRAM_CHAT_ID || '').trim();
   const agentCli = env.AI_AGENT_CLI || 'gemini';
   const taskTimeoutSec = parseInt(env.TASK_TIMEOUT || '600', 10);
-  const lang = (env.LISTENER_LANGUAGE || env.NOTIFICATION_LANGUAGE || 'ar-eg').toLowerCase();
-  const isArabic = lang.startsWith('ar');
+  const lang = (env.LISTENER_LANGUAGE || env.NOTIFICATION_LANGUAGE || 'ar').toLowerCase();
 
   if (!botToken || !authorizedChatId) {
     console.error('[Daemon Error] TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set in .env');
@@ -163,9 +160,10 @@ async function main() {
 
   // Send startup notification to user's phone
   try {
-    const startMsg = isArabic
-      ? `🟢 *تم تشغيل جسر التحكم التفاعلي (Daemon)*\n\n📂 المشروع النشط: \`${path.basename(getActiveWorkspace(state))}\`\n🧠 المساعد: \`${agentCli}\`\n\nأرسل أي برومبت أو أمر \`/projects\` للبدء.`
-      : `🟢 *Telegram Interactive Daemon Started*\n\n📂 Active Workspace: \`${path.basename(getActiveWorkspace(state))}\`\n🧠 AI Agent: \`${agentCli}\`\n\nSend any prompt or \`/projects\` to start.`;
+    const startMsg = i18n.t('daemon.startup', lang, {
+      workspace: path.basename(getActiveWorkspace(state)),
+      agent: agentCli,
+    });
 
     await client.sendMessage(authorizedChatId, startMsg);
   } catch (err) {
@@ -208,13 +206,12 @@ async function main() {
  */
 async function handleMessage(client, message, state, authorizedChatId, agentCli, timeoutSec, lang) {
   const chatId = String(message.chat.id);
-  const isArabic = lang.startsWith('ar');
 
   // Security gate
   if (chatId !== authorizedChatId) {
     console.warn(`[Security Alert] Unauthorized access attempt from chat_id: ${chatId}`);
     try {
-      await client.sendMessage(chatId, '⛔ *غير مصرح*: هذا البوت مخصص للاستخدام الشخصي فقط.');
+      await client.sendMessage(chatId, i18n.t('daemon.unauthorized', lang));
     } catch {
       // Ignore
     }
@@ -229,37 +226,11 @@ async function handleMessage(client, message, state, authorizedChatId, agentCli,
 
   // Command Routing
   if (text === '/start' || text === '/help') {
-    const welcome = isArabic
-      ? [
-          '👋 *مرحباً بك في جسر التحكم التفاعلي!*',
-          '',
-          `📂 المشروع النشط: \`${projectName}\``,
-          `📁 المسار: \`${currentWorkspace}\``,
-          `🧠 المساعد الافتراضي: \`${agentCli}\``,
-          '',
-          '📌 *الأوامر المتاحة:*',
-          '• `/projects` - عرض واختيار آخر المشاريع عبر أزرار تفاعلية',
-          '• `/status` - تفاصيل المشروع النشط والمهمة الجارية',
-          '• `/stop` - إلغاء المهمة الجارية حالياً',
-          '• `/help` - عرض هذه الرسالة',
-          '',
-          '💡 *للتنفيذ*: اكتب أي برومبت أو مهمة مباشرة وسيتم تشغيلها داخل المشروع النشط وإشعارك بالنتيجة!',
-        ].join('\n')
-      : [
-          '👋 *Welcome to Telegram Interactive Agent Bridge!*',
-          '',
-          `📂 Active Project: \`${projectName}\``,
-          `📁 Path: \`${currentWorkspace}\``,
-          `🧠 AI Agent: \`${agentCli}\``,
-          '',
-          '📌 *Available Commands:*',
-          '• `/projects` - Browse & switch projects with buttons',
-          '• `/status` - Current project & task status',
-          '• `/stop` - Cancel running task',
-          '• `/help` - Show this message',
-          '',
-          '💡 *To execute*: Simply type any prompt or task, and it will run inside the active project!',
-        ].join('\n');
+    const welcome = i18n.t('daemon.help', lang, {
+      project: projectName,
+      path: currentWorkspace,
+      agent: agentCli,
+    });
 
     await client.sendMessage(chatId, welcome);
     return;
@@ -275,29 +246,17 @@ async function handleMessage(client, message, state, authorizedChatId, agentCli,
 
   if (text === '/status') {
     const branch = getGitBranch(currentWorkspace);
-    const statusMsg = isArabic
-      ? [
-          '📊 *حالة النظام:*',
-          `📂 المشروع النشط: \`${projectName}\``,
-          `🌿 الفرع (Git): \`${branch || 'None'}\``,
-          `📁 المسار: \`${currentWorkspace}\``,
-          `🧠 المساعد: \`${agentCli}\``,
-          `⚙️ حالة المهمة: ${runningProcess ? '⏳ جاري تنفيذ مهمة...' : '🟢 جاهز لاستقبال الأوامر'}`,
-          runningTaskInfo ? `📝 المهمة: _"${runningTaskInfo.prompt}"_` : '',
-        ]
-          .filter(Boolean)
-          .join('\n')
-      : [
-          '📊 *System Status:*',
-          `📂 Active Project: \`${projectName}\``,
-          `🌿 Git Branch: \`${branch || 'None'}\``,
-          `📁 Workspace: \`${currentWorkspace}\``,
-          `🧠 Agent: \`${agentCli}\``,
-          `⚙️ Task Status: ${runningProcess ? '⏳ Running...' : '🟢 Idle / Ready'}`,
-          runningTaskInfo ? `📝 Task: _"${runningTaskInfo.prompt}"_` : '',
-        ]
-          .filter(Boolean)
-          .join('\n');
+    const statusMsg = [
+      i18n.t('daemon.status_title', lang),
+      i18n.t('daemon.status_active_project', lang, { project: projectName }),
+      i18n.t('daemon.status_branch', lang, { branch: branch || 'None' }),
+      i18n.t('daemon.status_workspace', lang, { path: currentWorkspace }),
+      i18n.t('daemon.status_agent', lang, { agent: agentCli }),
+      `⚙️ ${runningProcess ? i18n.t('daemon.status_task_running', lang) : i18n.t('daemon.status_task_idle', lang)}`,
+      runningTaskInfo ? i18n.t('daemon.status_task_label', lang, { prompt: runningTaskInfo.prompt }) : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     await client.sendMessage(chatId, statusMsg);
     return;
@@ -310,21 +269,16 @@ async function handleMessage(client, message, state, authorizedChatId, agentCli,
       } catch {
         // Ignore
       }
-      const stopMsg = isArabic ? '🛑 *تم إرسال أمر إيقاف المهمة الجارية.*' : '🛑 *Stopping running task...*';
-      await client.sendMessage(chatId, stopMsg);
+      await client.sendMessage(chatId, i18n.t('daemon.stop_initiated', lang));
     } else {
-      const idleMsg = isArabic ? 'ℹ️ لا توجد مهمة قيد التنفيذ حالياً.' : 'ℹ️ No task is currently running.';
-      await client.sendMessage(chatId, idleMsg);
+      await client.sendMessage(chatId, i18n.t('daemon.stop_idle', lang));
     }
     return;
   }
 
   // Handle Regular Prompt Execution
   if (runningProcess) {
-    const busyMsg = isArabic
-      ? '⚠️ *توجد مهمة قيد التنفيذ بالفعل!*\n\nيمكنك إيقافها باستخدام أمر `/stop` أولاً.'
-      : '⚠️ *A task is already running!*\n\nYou can abort it by sending `/stop`.';
-    await client.sendMessage(chatId, busyMsg);
+    await client.sendMessage(chatId, i18n.t('daemon.task_already_running', lang));
     return;
   }
 
@@ -338,7 +292,6 @@ async function handleCallbackQuery(client, callbackQuery, state, authorizedChatI
   const chatId = String(callbackQuery.message.chat.id);
   const data = callbackQuery.data || '';
   const queryId = callbackQuery.id;
-  const isArabic = lang.startsWith('ar');
 
   if (chatId !== authorizedChatId) return;
 
@@ -353,16 +306,18 @@ async function handleCallbackQuery(client, callbackQuery, state, authorizedChatI
       state.lastActivity = new Date().toISOString();
       saveState(state);
 
-      await client.answerCallbackQuery(queryId, isArabic ? `تم اختيار: ${selected.name}` : `Selected: ${selected.name}`);
+      await client.answerCallbackQuery(queryId, i18n.t('daemon.selected_project_alert', lang, { name: selected.name }));
 
       const branch = selected.branch ? ` \`[${selected.branch}]\`` : '';
-      const confirmMsg = isArabic
-        ? `✅ *تم تبديل مسار العمل النشط!*\n\n📂 المشروع: *${selected.name}*${branch}\n📁 المسار: \`${selected.path}\`\n\n🚀 أي برومبت ترسله الآن سيُنفذ مباشرة داخل هذا المشروع.`
-        : `✅ *Active Workspace Switched!*\n\n📂 Project: *${selected.name}*${branch}\n📁 Path: \`${selected.path}\`\n\n🚀 Next prompts will be executed in this workspace.`;
+      const confirmMsg = i18n.t('daemon.switched_workspace', lang, {
+        name: selected.name,
+        branch: branch,
+        path: selected.path,
+      });
 
       await client.sendMessage(chatId, confirmMsg);
     } else {
-      await client.answerCallbackQuery(queryId, isArabic ? 'المشروع غير موجود' : 'Project not found');
+      await client.answerCallbackQuery(queryId, i18n.t('daemon.project_not_found_alert', lang));
     }
     return;
   }
@@ -376,22 +331,12 @@ async function handleCallbackQuery(client, callbackQuery, state, authorizedChatI
     const isApprove = action === 'approve';
     await client.answerCallbackQuery(
       queryId,
-      isApprove ? (isArabic ? 'تمت الموافقة ✅' : 'Approved ✅') : isArabic ? 'تم الرفض ❌' : 'Rejected ❌'
+      isApprove ? i18n.t('buttons.approve_alert', lang) : i18n.t('buttons.reject_alert', lang)
     );
 
-    if (pendingApprovals.has(approvalId)) {
-      const handler = pendingApprovals.get(approvalId);
-      handler(isApprove);
-      pendingApprovals.delete(approvalId);
-    }
-
     const actionText = isApprove
-      ? isArabic
-        ? '🟢 *تمت الموافقة من تليجرام.* جاري استكمال التنفيذ...'
-        : '🟢 *Approved via Telegram.* Proceeding...'
-      : isArabic
-      ? '🔴 *تم الرفض من تليجرام.* تم إلغاء الإجراء.'
-      : '🔴 *Rejected via Telegram.* Operation aborted.';
+      ? i18n.t('daemon.approval_confirmed', lang)
+      : i18n.t('daemon.rejection_confirmed', lang);
 
     await client.sendMessage(chatId, actionText);
     return;
@@ -404,13 +349,15 @@ async function handleCallbackQuery(client, callbackQuery, state, authorizedChatI
  * Execute prompt with configured AI CLI Agent
  */
 async function executePrompt(client, promptText, workspacePath, agentCli, timeoutSec, chatId, lang) {
-  const isArabic = lang.startsWith('ar');
   const projectName = path.basename(workspacePath);
 
   // Send "Task Started" acknowledgement
-  const startMsg = isArabic
-    ? `⏳ *جاري تنفيذ المهمة...*\n\n📂 المشروع: \`${projectName}\`\n📝 البرومبت: _"${promptText.slice(0, 150)}${promptText.length > 150 ? '...' : ''}"_\n🧠 المساعد: \`${agentCli}\`\n\n_أرسل \`/stop\` إذا أردت الإلغاء._`
-    : `⏳ *Starting Task Execution...*\n\n📂 Project: \`${projectName}\`\n📝 Prompt: _"${promptText.slice(0, 150)}${promptText.length > 150 ? '...' : ''}"_\n🧠 Agent: \`${agentCli}\`\n\n_Send \`/stop\` to cancel anytime._`;
+  const promptPreview = promptText.slice(0, 150) + (promptText.length > 150 ? '...' : '');
+  const startMsg = i18n.t('daemon.task_starting', lang, {
+    project: projectName,
+    prompt: promptPreview,
+    agent: agentCli,
+  });
 
   await client.sendMessage(chatId, startMsg);
 
@@ -481,12 +428,12 @@ async function executePrompt(client, promptText, workspacePath, agentCli, timeou
       console.log(`[Task Closed] Exit code: ${code}, Duration: ${durationSec}s`);
 
       if (code === 0) {
-        const successTitle = isArabic ? `✅ *اكتملت المهمة بنجاح* (${durationSec}s)` : `✅ *Task Finished Successfully* (${durationSec}s)`;
+        const successTitle = i18n.t('daemon.task_finished_success', lang, { duration: durationSec });
         const formattedOutput = formatTelegramOutput(stdoutData || stderrData);
         const resultMsg = `${successTitle}\n📂 \`${projectName}\`\n\n${formattedOutput}`;
         await client.sendMessage(chatId, resultMsg);
       } else {
-        const failTitle = isArabic ? `❌ *انتهت المهمة مع خطأ* (Code: ${code}, ${durationSec}s)` : `❌ *Task Failed* (Code: ${code}, ${durationSec}s)`;
+        const failTitle = i18n.t('daemon.task_finished_error', lang, { code: code, duration: durationSec });
         const errorContent = stderrData || stdoutData || 'Process terminated or command not found.';
         const formattedOutput = formatTelegramOutput(errorContent);
         const resultMsg = `${failTitle}\n📂 \`${projectName}\`\n\n${formattedOutput}`;
@@ -500,8 +447,9 @@ async function executePrompt(client, promptText, workspacePath, agentCli, timeou
       runningTaskInfo = null;
 
       console.error(`[Process Error]: ${err.message}`);
-      const errTitle = isArabic ? '❌ *فشل تشغيل أمر المساعد*' : '❌ *Failed to spawn AI Agent CLI*';
-      const errMsg = `${errTitle}\n\n⚠️ ${err.message}\n💡 _تأكد من أن \`${agentCli}\` مثبت ومتاح في مسار PATH أو حدد الأمر في .env (AI_AGENT_CLI)._`;
+      const errTitle = i18n.t('daemon.spawn_failed_title', lang);
+      const errHelp = i18n.t('daemon.spawn_failed_help', lang, { agent: agentCli });
+      const errMsg = `${errTitle}\n\n⚠️ ${err.message}\n${errHelp}`;
       await client.sendMessage(chatId, errMsg);
     });
   } catch (err) {

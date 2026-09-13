@@ -1,0 +1,80 @@
+{
+  "_name": "English",
+  "_nativeName": "English",
+  "events": {
+    "task_finished": {
+      "title": "Task Finished",
+      "emoji": "✅",
+      "label": "Task Finished"
+    },
+    "approval_required": {
+      "title": "Approval Required",
+      "emoji": "⚠️",
+      "label": "Approval Required"
+    },
+    "error": {
+      "title": "Error Occurred",
+      "emoji": "❌",
+      "label": "Error Occurred"
+    },
+    "info": {
+      "title": "Notification",
+      "emoji": "ℹ️",
+      "label": "Notification"
+    },
+    "alert": {
+      "title": "Alert",
+      "emoji": "🔔",
+      "label": "Alert"
+    }
+  },
+  "buttons": {
+    "approve": "🟢 Approve",
+    "reject": "🔴 Reject",
+    "approve_alert": "Approved ✅",
+    "reject_alert": "Rejected ❌"
+  },
+  "setup": {
+    "test_title": "Setup Successful! 🚀",
+    "test_message": "Your Telegram Notifier is now fully connected and ready for AI Agent workflows."
+  },
+  "projects": {
+    "title": "📂 *Recent Projects:*",
+    "none_found": "No projects found in configured workspace directories.",
+    "active_badge": " 🟢 *(Active)*",
+    "footer": "\n💡 _Tap a button below to select active workspace._"
+  },
+  "time": {
+    "just_now": "just now",
+    "minutes_ago": "{minutes}m ago",
+    "hours_ago": "{hours}h ago",
+    "yesterday": "yesterday",
+    "days_ago": "{days}d ago"
+  },
+  "daemon": {
+    "startup": "🟢 *Telegram Interactive Daemon Started*\n\n📂 Active Workspace: `{workspace}`\n🧠 AI Agent: `{agent}`\n\nSend any prompt or `/projects` to start.",
+    "unauthorized": "⛔ *Unauthorized:* This bot is configured for personal use only.",
+    "help": "👋 *Welcome to Telegram Interactive Agent Bridge!*\n\n📂 Active Project: `{project}`\n📁 Path: `{path}`\n🧠 AI Agent: `{agent}`\n\n📌 *Available Commands:*\n• `/projects` - Browse & switch projects with buttons\n• `/status` - Current project & task status\n• `/stop` - Cancel running task\n• `/help` - Show this message\n\n💡 *To execute*: Simply type any prompt or task, and it will run inside the active project!",
+    "status_title": "📊 *System Status:*",
+    "status_active_project": "📂 Active Project: `{project}`",
+    "status_branch": "🌿 Git Branch: `{branch}`",
+    "status_workspace": "📁 Workspace: `{path}`",
+    "status_agent": "🧠 Agent: `{agent}`",
+    "status_task_running": "⏳ Running...",
+    "status_task_idle": "🟢 Idle / Ready",
+    "status_task_label": "📝 Task: _\"{prompt}\"_",
+    "stop_initiated": "🛑 *Stopping running task...*",
+    "stop_idle": "ℹ️ No task is currently running.",
+    "task_already_running": "⚠️ *A task is already running!*\n\nYou can abort it by sending `/stop`.",
+    "selected_project_alert": "Selected: {name}",
+    "project_not_found_alert": "Project not found",
+    "switched_workspace": "✅ *Active Workspace Switched!*\n\n📂 Project: *{name}*{branch}\n📁 Path: `{path}`\n\n🚀 Next prompts will be executed in this workspace.",
+    "approval_confirmed": "🟢 *Approved via Telegram.* Proceeding...",
+    "rejection_confirmed": "🔴 *Rejected via Telegram.* Operation aborted.",
+    "task_starting": "⏳ *Starting Task Execution...*\n\n📂 Project: `{project}`\n📝 Prompt: _\"{prompt}\"_\n🧠 Agent: `{agent}`\n\n_Send `/stop` to cancel anytime._",
+    "task_finished_success": "✅ *Task Finished Successfully* ({duration}s)",
+    "task_finished_error": "❌ *Task Failed* (Code: {code}, {duration}s)",
+    "spawn_failed_title": "❌ *Failed to spawn AI Agent CLI*",
+    "spawn_failed_help": "💡 _Make sure `{agent}` is installed and available in PATH, or specify AI_AGENT_CLI in .env._"
+  }
+}

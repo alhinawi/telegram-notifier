@@ -44,13 +44,13 @@ The interactive listener daemon allows you to send prompts and manage projects f
 
 ## Notification Language & Tone
 
-The notification defaults to Egyptian Arabic (`ar-eg`) or English (`en`), and can be switched to Standard Arabic (`ar`):
+The notification defaults to Arabic (`ar`) or English (`en`):
 
-| Event Type | Flag | English | Egyptian Arabic (`ar-eg`) | Standard Arabic (`ar`) |
-| --- | --- | --- | --- | --- |
-| Task finished | `--type="task_finished"` | `"Task Finished"` | `"خلصت يا معلم"` | `"اكتملت المهمة بنجاح"` |
-| Approval needed | `--type="approval_required"` | `"Approval Required"` | `"محتاج اذنك يا معلم"` | `"مطلوب مراجعة وتأكيد"` |
-| Error occurred | `--type="error"` | `"Error Occurred"` | `"فيه مشكلة يا معلم"` | `"حدث خطأ أثناء التنفيذ"` |
+| Event Type | Flag | English | Arabic (`ar`) |
+| --- | --- | --- | --- |
+| Task finished | `--type="task_finished"` | `"Task Finished"` | `"اكتملت المهمة بنجاح"` |
+| Approval needed | `--type="approval_required"` | `"Approval Required"` | `"مطلوب مراجعة وتأكيد"` |
+| Error occurred | `--type="error"` | `"Error Occurred"` | `"حدث خطأ أثناء التنفيذ"` |
 
 ## Execution Syntax
 

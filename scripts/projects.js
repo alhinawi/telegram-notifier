@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { loadEnv } = require('./telegram-api');
+const i18n = require('./i18n');
 
 /**
  * Expand ~ to user's home directory
@@ -126,21 +127,19 @@ function formatTimeAgo(timestamp, lang = 'en') {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  const isArabic = lang.startsWith('ar');
-
   if (diffMinutes < 5) {
-    return isArabic ? 'الآن' : 'just now';
+    return i18n.t('time.just_now', lang);
   }
   if (diffMinutes < 60) {
-    return isArabic ? `منذ ${diffMinutes} دقيقة` : `${diffMinutes}m ago`;
+    return i18n.t('time.minutes_ago', lang, { minutes: diffMinutes });
   }
   if (diffHours < 24) {
-    return isArabic ? `منذ ${diffHours} ساعة` : `${diffHours}h ago`;
+    return i18n.t('time.hours_ago', lang, { hours: diffHours });
   }
   if (diffDays === 1) {
-    return isArabic ? 'أمس' : 'yesterday';
+    return i18n.t('time.yesterday', lang);
   }
-  return isArabic ? `منذ ${diffDays} يوم` : `${diffDays}d ago`;
+  return i18n.t('time.days_ago', lang, { days: diffDays });
 }
 
 /**
@@ -192,9 +191,8 @@ function discoverProjects(maxCount = 10) {
  * Format project list text for Telegram message
  */
 function formatProjectsMessage(projects, activePath = '', lang = 'en') {
-  const isArabic = lang.startsWith('ar');
-  const title = isArabic ? '📂 *آخر المشاريع التي تم العمل عليها:*' : '📂 *Recent Projects:*';
-  const noneFound = isArabic ? 'لم يتم العثور على مشاريع في المسارات المحددة.' : 'No projects found in configured workspace directories.';
+  const title = i18n.t('projects.title', lang);
+  const noneFound = i18n.t('projects.none_found', lang);
 
   if (projects.length === 0) {
     return `${title}\n\n_${noneFound}_`;
@@ -206,7 +204,7 @@ function formatProjectsMessage(projects, activePath = '', lang = 'en') {
   projects.forEach((proj, index) => {
     const num = numberEmojis[index] || `[${index + 1}]`;
     const isActive = activePath && path.resolve(proj.path) === path.resolve(activePath);
-    const activeBadge = isActive ? (isArabic ? ' 🟢 *(نشط الآن)*' : ' 🟢 *(Active)*') : '';
+    const activeBadge = isActive ? i18n.t('projects.active_badge', lang) : '';
     const timeAgo = formatTimeAgo(proj.mtime, lang);
     const branchInfo = proj.branch ? ` \`[${proj.branch}]\`` : '';
     const timeInfo = timeAgo ? ` _(${timeAgo})_` : '';
@@ -214,11 +212,7 @@ function formatProjectsMessage(projects, activePath = '', lang = 'en') {
     lines.push(`${num} *${proj.name}*${activeBadge}${branchInfo}${timeInfo}`);
   });
 
-  const footer = isArabic
-    ? '\n💡 _اضغط على الزر أدناه لاختيار المشروع وتوجيه الأوامر إليه مباشرة._'
-    : '\n💡 _Tap a button below to select active workspace._';
-
-  lines.push(footer);
+  lines.push(i18n.t('projects.footer', lang));
   return lines.join('\n');
 }
 
