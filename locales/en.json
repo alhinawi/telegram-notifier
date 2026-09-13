@@ -54,7 +54,7 @@
   "daemon": {
     "startup": "*Telegram Interactive Daemon Started*\n\nActive Workspace: `{workspace}`\nAI Agent: `{agent}`\n\nSend any prompt or `/projects` to start.",
     "unauthorized": "*Unauthorized:* This bot is configured for personal use only.",
-    "help": "*Welcome to Telegram Interactive Agent Bridge!*\n\nActive Project: `{project}`\nPath: `{path}`\nAI Agent: `{agent}`\n\n*Available Commands:*\n• `/projects` - Browse & switch projects with buttons\n• `/cd <path/name>` - Switch active project directory directly\n• `/dirs` - View & manage workspace root folders (`/add_dir`)\n• `/language` - Change bot and notification language\n• `/status` - Current project & task status\n• `/stop` - Cancel running task\n• `/help` - Show this message\n\n*To execute*: Simply type any prompt or task, and it will run inside the active project!",
+    "help": "*Welcome to Telegram Interactive Agent Bridge!*\n\nActive Project: `{project}`\nPath: `{path}`\nAI Agent: `{agent}`\n\n*Available Commands:*\n• `/projects` - Browse & switch projects with buttons\n• `/cd <path/name>` - Switch active project directory directly\n• `/ls [path]` - List files & folders in active directory\n• `/dirs` - View & manage workspace root folders (`/add_dir`)\n• `/language` - Change bot and notification language\n• `/status` - Current project & task status\n• `/stop` - Cancel running task\n• `/help` - Show this message\n\n*To execute*: Simply type any prompt or task, and it will run inside the active project!",
     "status_title": "*System Status:*",
     "status_active_project": "Active Project: `{project}`",
     "status_branch": "Git Branch: `{branch}`",
@@ -87,11 +87,17 @@
     "dirs_del_success": "*Workspace directory removed:* `{path}`",
     "language_title": "*Choose notification and control language:*",
     "language_switched_alert": "Language switched to English",
-    "language_switched": "*Language switched successfully!*\nCurrent language: English\n\nAll future notifications and responses will be in English."
+    "language_switched": "*Language switched successfully!*\nCurrent language: English\n\nAll future notifications and responses will be in English.",
+    "ls_title": "*Directory Contents:*\n`{path}`",
+    "ls_dirs_header": "*Directories ({count}):*",
+    "ls_files_header": "*Files ({count}):*",
+    "ls_empty": "*Directory is empty:* `{path}`",
+    "ls_not_found": "*Directory not found:* `{path}`"
   },
   "commands": {
     "projects": "Browse and switch recent projects",
     "cd": "Switch or view active workspace directory",
+    "ls": "List files and folders in active directory",
     "dirs": "View and manage workspace folders",
     "language": "Change bot and notification language",
     "status": "Daemon health and active task status",

@@ -35,6 +35,7 @@ The interactive listener daemon allows you to send prompts and manage projects f
 ### Telegram Bot Commands
 
 - `/projects` - Browse and switch between recent projects using interactive buttons.
+- `/ls [path]` - List files and directories in the active workspace project.
 - `/dirs` - View and manage workspace root scan folders (`/add_dir`, `/del_dir`).
 - `/language` - Change bot and notification language with interactive buttons.
 - `/status` - View active project, git branch, AI agent CLI, and running task status.

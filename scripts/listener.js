@@ -147,11 +147,18 @@ function formatTelegramOutput(text, maxLength = 3500) {
 	);
 }
 
+function formatFileSize(bytes) {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 async function registerBotCommands(client, activeLang = "ar") {
 	function getCommandsForLang(langCode) {
 		return [
 			{ command: "projects", description: i18n.t("commands.projects", langCode) },
 			{ command: "cd", description: i18n.t("commands.cd", langCode) },
+			{ command: "ls", description: i18n.t("commands.ls", langCode) },
 			{ command: "dirs", description: i18n.t("commands.dirs", langCode) },
 			{ command: "language", description: i18n.t("commands.language", langCode) },
 			{ command: "status", description: i18n.t("commands.status", langCode) },
@@ -544,6 +551,87 @@ async function handleMessage(
 
 		const msg = i18n.t("daemon.language_title", lang);
 		await client.sendMessageWithButtons(chatId, msg, keyboard);
+		return;
+	}
+
+	// List files and directories: /ls or /list
+	if (cmd === "/ls" || cmd === "/list") {
+		let targetDir = currentWorkspace;
+		if (arg) {
+			const direct = path.resolve(expandHome(arg));
+			if (fs.existsSync(direct) && fs.statSync(direct).isDirectory()) {
+				targetDir = direct;
+			} else {
+				const rel = path.resolve(currentWorkspace, expandHome(arg));
+				if (fs.existsSync(rel) && fs.statSync(rel).isDirectory()) {
+					targetDir = rel;
+				} else {
+					await client.sendMessage(
+						chatId,
+						i18n.t("daemon.ls_not_found", lang, { path: arg }),
+					);
+					return;
+				}
+			}
+		}
+
+		try {
+			const entries = fs.readdirSync(targetDir, { withFileTypes: true });
+			if (entries.length === 0) {
+				await client.sendMessage(
+					chatId,
+					i18n.t("daemon.ls_empty", lang, { path: targetDir }),
+				);
+				return;
+			}
+
+			const dirs = [];
+			const files = [];
+
+			for (const entry of entries) {
+				if (entry.name === ".git") continue;
+				if (entry.isDirectory()) {
+					dirs.push(entry.name + "/");
+				} else {
+					let sizeStr = "";
+					try {
+						const stats = fs.statSync(path.join(targetDir, entry.name));
+						sizeStr = ` (${formatFileSize(stats.size)})`;
+					} catch {
+						// Ignore size error
+					}
+					files.push(`${entry.name}${sizeStr}`);
+				}
+			}
+
+			dirs.sort((a, b) => a.localeCompare(b));
+			files.sort((a, b) => a.localeCompare(b));
+
+			const lines = [
+				i18n.t("daemon.ls_title", lang, { path: targetDir }),
+				"",
+			];
+
+			if (dirs.length > 0) {
+				lines.push(i18n.t("daemon.ls_dirs_header", lang, { count: dirs.length }));
+				dirs.slice(0, 30).forEach((d) => lines.push(`• \`${d}\``));
+				if (dirs.length > 30) lines.push(`_... (+${dirs.length - 30})_`);
+				lines.push("");
+			}
+
+			if (files.length > 0) {
+				lines.push(i18n.t("daemon.ls_files_header", lang, { count: files.length }));
+				files.slice(0, 40).forEach((f) => lines.push(`• \`${f}\``));
+				if (files.length > 40) lines.push(`_... (+${files.length - 40})_`);
+			}
+
+			await client.sendMessage(chatId, lines.join("\n"));
+		} catch (err) {
+			await client.sendMessage(
+				chatId,
+				`Error reading directory: ${err.message}`,
+			);
+		}
 		return;
 	}
 
