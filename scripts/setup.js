@@ -10,6 +10,7 @@ const path = require('path');
 const https = require('https');
 const readline = require('readline');
 const os = require('os');
+const serviceManager = require('./service-manager');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -61,6 +62,11 @@ function saveEnv(envConfig, targetFile) {
     `TELEGRAM_BOT_TOKEN=${envConfig.TELEGRAM_BOT_TOKEN || ''}`,
     `TELEGRAM_CHAT_ID=${envConfig.TELEGRAM_CHAT_ID || ''}`,
     `NOTIFICATION_LANGUAGE=${envConfig.NOTIFICATION_LANGUAGE || 'en'}`,
+    '',
+    '# Two-Way Interactive Bridge Configuration',
+    `WORKSPACE_DIRS=${envConfig.WORKSPACE_DIRS || '~/workspace/personal,~/workspace'}`,
+    `AI_AGENT_CLI=${envConfig.AI_AGENT_CLI || 'gemini'}`,
+    `TASK_TIMEOUT=${envConfig.TASK_TIMEOUT || '600'}`,
     '',
   ];
   fs.writeFileSync(targetFile, lines.join('\n'), 'utf8');
@@ -339,10 +345,28 @@ async function main() {
   if (langChoice.trim() === '2') lang = 'ar-eg';
   else if (langChoice.trim() === '3') lang = 'ar';
 
+  // 4. Two-Way Interactive Bridge Configuration
+  console.log('\n--------------------------------------------------------');
+  console.log('🔄 Two-Way Interactive Bridge Configuration:');
+  const defaultDirs = existingEnv.WORKSPACE_DIRS || '~/workspace/personal,~/workspace';
+  console.log(`📁 Project Workspaces to scan (comma-separated):`);
+  console.log(`   (Default: ${defaultDirs})`);
+  const dirsInput = await ask('Workspace directories: ');
+  const workspaceDirs = dirsInput.trim() || defaultDirs;
+
+  const defaultAgent = existingEnv.AI_AGENT_CLI || 'gemini';
+  console.log(`\n🧠 AI Agent CLI tool (e.g. gemini, claude, aider):`);
+  console.log(`   (Default: ${defaultAgent})`);
+  const agentInput = await ask('AI Agent CLI: ');
+  const aiAgentCli = agentInput.trim() || defaultAgent;
+
   const envConfig = {
     TELEGRAM_BOT_TOKEN: botToken,
     TELEGRAM_CHAT_ID: chatId,
     NOTIFICATION_LANGUAGE: lang,
+    WORKSPACE_DIRS: workspaceDirs,
+    AI_AGENT_CLI: aiAgentCli,
+    TASK_TIMEOUT: existingEnv.TASK_TIMEOUT || '600',
   };
 
   // Always save local .env in current folder if it's the repo
@@ -350,7 +374,7 @@ async function main() {
     saveEnv(envConfig, ENV_PATH);
   }
 
-  // 4. Installation Scope
+  // 5. Installation Scope
   console.log('\n--------------------------------------------------------');
   console.log('⚙️ Installation Scope & Auto-Triggering:');
   console.log('  [1] Global (Install globally for ALL projects & AI Agents automatically)');
@@ -367,7 +391,7 @@ async function main() {
     installLocalProject(process.cwd(), envConfig);
   }
 
-  // 5. Test Notification
+  // 6. Test Notification
   console.log('\n--------------------------------------------------------');
   console.log('🔔 Sending a test notification to your phone...');
   try {
@@ -375,6 +399,17 @@ async function main() {
     console.log('🎉 Test notification delivered successfully! Check your Telegram.');
   } catch (err) {
     console.error(`❌ Failed to send test message: ${err.message}`);
+  }
+
+  // 7. Auto-start Background Service Setup
+  console.log('\n--------------------------------------------------------');
+  console.log('🚀 Background Daemon Service (Two-Way Interactive Bridge):');
+  console.log('  [1] Install & auto-start as OS background service (Recommended)');
+  console.log('  [2] Skip for now (Run manually when needed via `npm run daemon`)');
+  const serviceChoice = await ask('Choose option [1/2] (Default: 1): ');
+
+  if ((serviceChoice.trim() || '1') === '1') {
+    serviceManager.installService();
   }
 
   console.log('\n========================================================');

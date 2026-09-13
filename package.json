@@ -5,12 +5,19 @@
   "main": "scripts/notify.js",
   "bin": {
     "telegram-notifier": "scripts/setup.js",
-    "agent-notify": "scripts/notify.js"
+    "agent-notify": "scripts/notify.js",
+    "telegram-listener": "scripts/listener.js"
   },
   "scripts": {
     "setup": "node scripts/setup.js",
     "notify": "node scripts/notify.js",
-    "detect-chat-id": "node scripts/auto-detect-chat-id.js"
+    "detect-chat-id": "node scripts/auto-detect-chat-id.js",
+    "daemon": "node scripts/listener.js",
+    "projects": "node scripts/projects.js",
+    "service:install": "node scripts/service-manager.js install",
+    "service:uninstall": "node scripts/service-manager.js uninstall",
+    "service:status": "node scripts/service-manager.js status",
+    "service:restart": "node scripts/service-manager.js restart"
   },
   "keywords": [
     "telegram",

@@ -4,51 +4,14 @@
  * Universal Telegram Notifier Script
  * Sends formatted Telegram alerts when:
  * 1. A task finishes
- * 2. User approval is required
+ * 2. User approval is required (with optional interactive buttons)
  * 3. An error occurs
  *
  * Works with any AI Agent, CLI tool, or automated pipeline.
  */
 
-const fs = require('fs');
 const path = require('path');
-const https = require('https');
-const os = require('os');
-
-// Helper to find .env file across potential locations (local project, script parent, or global plugin dir)
-function loadEnv() {
-  const env = { ...process.env };
-  const homeDir = os.homedir();
-  const possiblePaths = [
-    path.resolve(process.cwd(), '.env'),
-    path.resolve(__dirname, '..', '.env'),
-    path.join(homeDir, '.gemini', 'config', 'plugins', 'telegram-notifier', '.env'),
-  ];
-
-  for (const envPath of possiblePaths) {
-    if (fs.existsSync(envPath)) {
-      try {
-        const content = fs.readFileSync(envPath, 'utf8');
-        content.split(/\r?\n/).forEach((line) => {
-          const trimmed = line.trim();
-          if (trimmed && !trimmed.startsWith('#')) {
-            const eqIdx = trimmed.indexOf('=');
-            if (eqIdx !== -1) {
-              const key = trimmed.slice(0, eqIdx).trim();
-              const value = trimmed.slice(eqIdx + 1).trim();
-              if (key && !env[key]) {
-                env[key] = value;
-              }
-            }
-          }
-        });
-      } catch (err) {
-        // silently continue to next possible location
-      }
-    }
-  }
-  return env;
-}
+const { loadEnv, TelegramClient } = require('./telegram-api');
 
 const env = loadEnv();
 const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN;
@@ -60,8 +23,10 @@ if (!BOT_TOKEN || !CHAT_ID) {
   process.exit(1);
 }
 
+const client = new TelegramClient(BOT_TOKEN);
+
 // Parse command line arguments
-// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar-eg|ar"
+// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar-eg|ar" --buttons
 const args = process.argv.slice(2);
 const params = {};
 
@@ -94,6 +59,8 @@ const LOCALES = {
     error: { title: 'Error Occurred', emoji: '❌', label: 'Error Occurred' },
     info: { title: 'Notification', emoji: 'ℹ️', label: 'Notification' },
     alert: { title: 'Alert', emoji: '🔔', label: 'Alert' },
+    approveBtn: '🟢 Approve',
+    rejectBtn: '🔴 Reject',
   },
   'ar-eg': {
     task_finished: { title: 'خلصت يا معلم', emoji: '✅', label: 'تمت المهمة' },
@@ -101,6 +68,8 @@ const LOCALES = {
     error: { title: 'فيه مشكلة يا معلم', emoji: '❌', label: 'حدث خطأ' },
     info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
     alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
+    approveBtn: '🟢 موافق يا معلم',
+    rejectBtn: '🔴 ارفض يا معلم',
   },
   ar: {
     task_finished: { title: 'اكتملت المهمة بنجاح', emoji: '✅', label: 'اكتملت المهمة' },
@@ -108,6 +77,8 @@ const LOCALES = {
     error: { title: 'حدث خطأ أثناء التنفيذ', emoji: '❌', label: 'حدث خطأ' },
     info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
     alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
+    approveBtn: '🟢 موافقة وتأكيد',
+    rejectBtn: '🔴 إلغاء ورفض',
   },
 };
 
@@ -140,58 +111,33 @@ const telegramText = [
   `\n🕒 _${now}_`,
 ].join('\n');
 
-function sendTelegramMessage(text) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({
-      chat_id: CHAT_ID,
-      text: text,
-      parse_mode: 'Markdown',
-      disable_web_page_preview: true,
-    });
+// Optional Interactive Buttons for Approvals
+let inlineKeyboard = null;
+const shouldAddButtons = params.buttons || (normalizedKey === 'approval_required' && params['no-buttons'] !== true);
 
-    const options = {
-      hostname: 'api.telegram.org',
-      port: 443,
-      path: `/bot${BOT_TOKEN}/sendMessage`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-      },
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.ok) {
-            console.log(`[Telegram Notifier] Notification sent successfully (${eventLabel}).`);
-            resolve(parsed);
-          } else {
-            console.error(`[Telegram Notifier] Telegram API error:`, parsed.description);
-            reject(new Error(parsed.description));
-          }
-        } catch (e) {
-          console.error(`[Telegram Notifier] Failed to parse response:`, data);
-          reject(e);
-        }
-      });
-    });
-
-    req.on('error', (e) => {
-      console.error(`[Telegram Notifier] Network error:`, e.message);
-      reject(e);
-    });
-
-    req.write(payload);
-    req.end();
-  });
+if (shouldAddButtons) {
+  const approvalId = Date.now().toString(36);
+  inlineKeyboard = [
+    [
+      { text: activeLocale.approveBtn || '🟢 Approve', callback_data: `approval:approve:${approvalId}` },
+      { text: activeLocale.rejectBtn || '🔴 Reject', callback_data: `approval:reject:${approvalId}` },
+    ],
+  ];
 }
 
-sendTelegramMessage(telegramText)
-  .then(() => process.exit(0))
-  .catch(() => process.exit(1));
+async function send() {
+  try {
+    if (inlineKeyboard) {
+      await client.sendMessageWithButtons(CHAT_ID, telegramText, inlineKeyboard);
+    } else {
+      await client.sendMessage(CHAT_ID, telegramText);
+    }
+    console.log(`[Telegram Notifier] Notification sent successfully (${eventLabel}).`);
+    process.exit(0);
+  } catch (err) {
+    console.error(`[Telegram Notifier] Failed to send notification: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+send();
