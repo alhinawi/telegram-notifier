@@ -62,10 +62,8 @@ With the interactive daemon running, your Telegram Bot becomes a full two-way co
 | ------------------ | ---------------------------------------------------------------------------------------- |
 | `/projects`        | Displays your most recently edited projects with inline buttons to switch workspace      |
 | `/cd <path/name>`  | Switch active project directory directly (supports `~`, relative paths, or project name) |
-| `/ls [path]`       | List files and directories inside the active workspace project                            |
+| `/ls [path]`       | List files and directories inside the active workspace project                           |
 | `/dirs`            | View scanned workspace roots and active directory                                        |
-| `/add_dir <path>`  | Add a new root directory for project scanning                                            |
-| `/del_dir <path>`  | Remove a root directory from project scanning                                            |
 | `/language`        | Switch notification and bot language via clickable interactive list                      |
 | `/status`          | Shows daemon health, active project, git branch, and running task status                 |
 | `/stop`            | Aborts the currently executing task on your machine                                      |
