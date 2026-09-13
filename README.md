@@ -27,76 +27,34 @@ sequenceDiagram
 
 ## Quick Start
 
-Install via skills CLI:
+Install the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf):
 
 ```bash
 npx skills add alhinawi/telegram-notifier
 ```
 
-Or run the interactive setup wizard: (Recommended)
+After installation, run the interactive setup wizard once to link your Telegram Bot and start the background service:
 
 ```bash
-npx github:alhinawi/telegram-notifier
+npm run setup
 ```
 
-During setup, the wizard will:
+The wizard will:
 
-1. Connect your Telegram Bot Token & auto-detect your Chat ID.
+1. Connect your Telegram Bot Token and auto-detect your Chat ID.
 2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
-3. Choose your AI Agent CLI tool (`gemini`, `claude`, `aider`).
-4. Auto-install the background daemon as an OS system service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
+3. Set your preferred AI Agent CLI tool (`gemini`, `claude`, `aider`).
+4. Auto-install and start the background daemon service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
 
 ---
 
-## How to Update (For Existing Users / للمستخدمين الحاليين)
+## How to Update
 
-If you previously installed **telegram-notifier** and want to upgrade to the latest **Two-Way Control Bridge** features without re-entering your Bot credentials:
-
-### Option 1: 1-Click Update (Recommended)
-
-Run from any terminal:
+To update the skill to the latest version at any time:
 
 ```bash
-npx github:alhinawi/telegram-notifier
+npx skills update telegram-notifier
 ```
-
-> **Auto-Migration**: The setup wizard automatically detects your existing `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, preserves them, and only prompts you for the new features (project folders and background service).
-
-### Option 2: Update via Skills CLI
-
-```bash
-npx skills add alhinawi/telegram-notifier
-```
-
-### Option 3: Update via 1-Liner Script
-
-- **macOS / Linux**:
-
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.sh | bash
-  ```
-
-- **Windows (PowerShell)**:
-
-  ```powershell
-  irm https://raw.githubusercontent.com/alhinawi/telegram-notifier/main/install.ps1 | iex
-  ```
-
-### Option 4: Prompt Your AI Agent to Update
-
-Copy and paste this prompt to your AI Assistant (Cursor, Claude Code, Antigravity, Windsurf):
-
-- **English**:
-
-  ```text
-  Please update the telegram-notifier plugin to the latest version from GitHub and configure the Two-Way Bridge background service.
-  ```
-
-- **العربية**:
-
-  ```text
-  من فضلك حدّث مهارة telegram-notifier إلى آخر إصدار من GitHub وفعّل خدمة جسر التحكم التفاعلي في الخلفية (Two-Way Bridge).
-  ```
 
 ---
 
