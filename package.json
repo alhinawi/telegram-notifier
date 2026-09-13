@@ -9,6 +9,7 @@
     "telegram-listener": "scripts/listener.js"
   },
   "scripts": {
+    "postinstall": "node scripts/setup.js",
     "setup": "node scripts/setup.js",
     "notify": "node scripts/notify.js",
     "detect-chat-id": "node scripts/auto-detect-chat-id.js",

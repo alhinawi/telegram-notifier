@@ -15,15 +15,13 @@ The AI Agent MUST invoke this notification tool automatically in the following s
 2. **Approval Required**: Before waiting for user confirmation, plan review, or high-stakes decision (with interactive inline approve/reject buttons).
 3. **Error Occurred**: When a command fails, build breaks, or an unexpected exception is encountered.
 
-## Setup & Configuration
+## Setup & Initialization
 
-If credentials are not yet configured in `.env`, run the interactive setup wizard:
+Upon adding this skill or before triggering it for the first time, check if `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured. If not configured, the AI Agent must execute the setup wizard immediately:
 
 ```bash
 node scripts/setup.js
 ```
-
-Or interactively follow the prompt to set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, workspace paths, and auto-start the background daemon service.
 
 ## Two-Way Interactive Bridge (Daemon)
 

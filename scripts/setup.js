@@ -235,6 +235,13 @@ async function main() {
 
   const existingEnv = loadExistingEnv();
 
+  // If running non-interactively without TTY, skip asking for input
+  if (!process.stdin.isTTY && (!existingEnv.TELEGRAM_BOT_TOKEN || existingEnv.TELEGRAM_BOT_TOKEN === 'your_bot_token_here')) {
+    console.log('Non-interactive environment detected. Run in an interactive terminal to configure.');
+    rl.close();
+    return;
+  }
+
   // 1. Bot Token
   let botToken = existingEnv.TELEGRAM_BOT_TOKEN || '';
   if (botToken && botToken !== 'your_bot_token_here') {

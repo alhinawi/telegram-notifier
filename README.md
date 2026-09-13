@@ -27,19 +27,13 @@ sequenceDiagram
 
 ## Quick Start
 
-Install the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf):
+Install and set up the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf) in one command:
 
 ```bash
 npx skills add alhinawi/telegram-notifier
 ```
 
-After installation, run the interactive setup wizard once to link your Telegram Bot and start the background service:
-
-```bash
-npm run setup
-```
-
-The wizard will:
+The interactive setup wizard will run automatically to:
 
 1. Connect your Telegram Bot Token and auto-detect your Chat ID.
 2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
@@ -53,7 +47,7 @@ The wizard will:
 To update the skill to the latest version at any time:
 
 ```bash
-npx skills update telegram-notifier
+npx skills update alhinawi/telegram-notifier
 ```
 
 ---
