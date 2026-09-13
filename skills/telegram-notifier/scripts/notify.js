@@ -26,7 +26,7 @@ if (!BOT_TOKEN || !CHAT_ID) {
 const client = new TelegramClient(BOT_TOKEN);
 
 // Parse command line arguments
-// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar-eg|ar" --buttons
+// Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar" --buttons
 const args = process.argv.slice(2);
 const params = {};
 
@@ -51,38 +51,10 @@ for (let i = 0; i < args.length; i++) {
 const rawType = (params.type || 'info').toLowerCase();
 const lang = (params.lang || env.NOTIFICATION_LANGUAGE || 'en').toLowerCase();
 
-// Language and Preset Localization Dictionary
-const LOCALES = {
-  en: {
-    task_finished: { title: 'Task Finished', emoji: '✅', label: 'Task Finished' },
-    approval_required: { title: 'Approval Required', emoji: '⚠️', label: 'Approval Required' },
-    error: { title: 'Error Occurred', emoji: '❌', label: 'Error Occurred' },
-    info: { title: 'Notification', emoji: 'ℹ️', label: 'Notification' },
-    alert: { title: 'Alert', emoji: '🔔', label: 'Alert' },
-    approveBtn: '🟢 Approve',
-    rejectBtn: '🔴 Reject',
-  },
-  'ar-eg': {
-    task_finished: { title: 'خلصت يا معلم', emoji: '✅', label: 'تمت المهمة' },
-    approval_required: { title: 'محتاج اذنك يا معلم', emoji: '⚠️', label: 'مطلوب إذنك' },
-    error: { title: 'فيه مشكلة يا معلم', emoji: '❌', label: 'حدث خطأ' },
-    info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
-    alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
-    approveBtn: '🟢 موافق يا معلم',
-    rejectBtn: '🔴 ارفض يا معلم',
-  },
-  ar: {
-    task_finished: { title: 'اكتملت المهمة بنجاح', emoji: '✅', label: 'اكتملت المهمة' },
-    approval_required: { title: 'مطلوب مراجعة وتأكيد', emoji: '⚠️', label: 'مطلوب الموافقة' },
-    error: { title: 'حدث خطأ أثناء التنفيذ', emoji: '❌', label: 'حدث خطأ' },
-    info: { title: 'إشعار', emoji: 'ℹ️', label: 'إشعار' },
-    alert: { title: 'تنبيه', emoji: '🔔', label: 'تنبيه' },
-    approveBtn: '🟢 موافقة وتأكيد',
-    rejectBtn: '🔴 إلغاء ورفض',
-  },
-};
-
-const activeLocale = LOCALES[lang] || LOCALES.en;
+const i18n = require('./i18n');
+const locale = i18n.getLocale(lang);
+const events = locale.events || {};
+const buttons = locale.buttons || {};
 
 // Normalize event type key
 let normalizedKey = 'info';
@@ -94,7 +66,7 @@ if (['finish', 'task_finish', 'task_finished', 'task_complete', 'task_completed'
   normalizedKey = 'error';
 }
 
-const config = activeLocale[normalizedKey] || activeLocale.info;
+const config = events[normalizedKey] || events.info || { title: 'Notification', emoji: 'ℹ️', label: 'Notification' };
 const headerEmoji = config.emoji;
 const eventLabel = config.label;
 const title = params.title || config.title;
@@ -119,8 +91,8 @@ if (shouldAddButtons) {
   const approvalId = Date.now().toString(36);
   inlineKeyboard = [
     [
-      { text: activeLocale.approveBtn || '🟢 Approve', callback_data: `approval:approve:${approvalId}` },
-      { text: activeLocale.rejectBtn || '🔴 Reject', callback_data: `approval:reject:${approvalId}` },
+      { text: buttons.approve || '🟢 Approve', callback_data: `approval:approve:${approvalId}` },
+      { text: buttons.reject || '🔴 Reject', callback_data: `approval:reject:${approvalId}` },
     ],
   ];
 }

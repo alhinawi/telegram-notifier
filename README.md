@@ -170,13 +170,13 @@ Please install and configure the telegram-notifier skill by running `npx skills 
 
 ## 🌐 Language Options & Presets
 
-You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar-eg|ar`) or specify `--lang` per call:
+You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or specify `--lang` per call:
 
-| Event Type | English (Default `en`) | Egyptian Arabic (`ar-eg`) | Standard Arabic (`ar`) |
-| --- | --- | --- | --- |
-| `--type=task_finished` | `Task Finished` | `خلصت يا معلم` | `اكتملت المهمة بنجاح` |
-| `--type=approval_required` | `Approval Required` | `محتاج اذنك يا معلم` | `مطلوب مراجعة وتأكيد` |
-| `--type=error` | `Error Occurred` | `فيه مشكلة يا معلم` | `حدث خطأ أثناء التنفيذ` |
+| Event Type | English (`en`) | Arabic (`ar`) |
+| --- | --- | --- |
+| `--type=task_finished` | `Task Finished` | `اكتملت المهمة بنجاح` |
+| `--type=approval_required` | `Approval Required` | `مطلوب مراجعة وتأكيد` |
+| `--type=error` | `Error Occurred` | `حدث خطأ أثناء التنفيذ` |
 
 ---
 

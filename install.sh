@@ -12,4 +12,8 @@ trap "rm -rf '$TEMP_DIR'" EXIT
 echo "📦 Downloading latest files..."
 git clone https://github.com/alhinawi/telegram-notifier.git "$TEMP_DIR" --depth 1 -q
 cd "$TEMP_DIR"
-node scripts/setup.js
+if [ -t 0 ]; then
+  node scripts/setup.js
+else
+  node scripts/setup.js < /dev/tty
+fi
