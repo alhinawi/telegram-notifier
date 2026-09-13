@@ -37,6 +37,8 @@ The interactive listener daemon allows you to send prompts and manage projects f
 ### Telegram Bot Commands
 
 - `/projects` - Browse and switch between recent projects using interactive buttons.
+- `/dirs` - View and manage workspace root scan folders (`/add_dir`, `/del_dir`).
+- `/language` - Change bot and notification language with interactive buttons.
 - `/status` - View active project, git branch, AI agent CLI, and running task status.
 - `/stop` - Abort currently running task on the machine.
 - `/help` - View command help and instructions.
@@ -68,7 +70,7 @@ node scripts/notify.js --type="task_finished" --message="Completed task successf
 node scripts/notify.js --type="approval_required" --message="Waiting for your review on the implementation plan." --project="<project-name>"
 ```
 
-*(Automatically renders 🟢 [Approve] and 🔴 [Reject] inline buttons on Telegram).*
+*(Automatically renders [Approve] and [Reject] inline buttons on Telegram).*
 
 ### 3. Error Occurred
 

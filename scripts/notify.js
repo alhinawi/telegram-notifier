@@ -10,7 +10,9 @@
  * Works with any AI Agent, CLI tool, or automated pipeline.
  */
 
+const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { loadEnv, TelegramClient } = require('./telegram-api');
 
 const env = loadEnv();
@@ -24,6 +26,19 @@ if (!BOT_TOKEN || !CHAT_ID) {
 }
 
 const client = new TelegramClient(BOT_TOKEN);
+
+function getSavedLanguage() {
+  try {
+    const stateFile = path.join(os.homedir(), '.telegram-notifier', 'state.json');
+    if (fs.existsSync(stateFile)) {
+      const data = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      if (data && data.language) return data.language;
+    }
+  } catch {
+    // Ignore
+  }
+  return null;
+}
 
 // Parse command line arguments
 // Usage: node notify.js --type=[task_finished|approval_required|error] --title="Title" --message="Details" --project="Project Name" --lang="en|ar" --buttons
@@ -49,7 +64,8 @@ for (let i = 0; i < args.length; i++) {
 }
 
 const rawType = (params.type || 'info').toLowerCase();
-const lang = (params.lang || env.NOTIFICATION_LANGUAGE || 'en').toLowerCase();
+const savedLang = getSavedLanguage();
+const lang = (params.lang || env.NOTIFICATION_LANGUAGE || savedLang || 'en').toLowerCase();
 
 const i18n = require('./i18n');
 const locale = i18n.getLocale(lang);
@@ -66,8 +82,8 @@ if (['finish', 'task_finish', 'task_finished', 'task_complete', 'task_completed'
   normalizedKey = 'error';
 }
 
-const config = events[normalizedKey] || events.info || { title: 'Notification', emoji: 'ℹ️', label: 'Notification' };
-const headerEmoji = config.emoji;
+const config = events[normalizedKey] || events.info || { title: 'Notification', emoji: '', label: 'Notification' };
+const headerEmoji = config.emoji ? `${config.emoji} ` : '';
 const eventLabel = config.label;
 const title = params.title || config.title;
 const message = params.message || params.text || '';
@@ -77,10 +93,10 @@ const now = new Date().toLocaleString();
 
 // Construct message text using Markdown formatting
 const telegramText = [
-  `${headerEmoji} *[${eventLabel}]* \`${project}\``,
+  `${headerEmoji}*[${eventLabel}]* \`${project}\``.trim(),
   `*${title}*`,
   message ? `\n${message}` : '',
-  `\n🕒 _${now}_`,
+  `\n_${now}_`,
 ].join('\n');
 
 // Optional Interactive Buttons for Approvals
@@ -91,8 +107,8 @@ if (shouldAddButtons) {
   const approvalId = Date.now().toString(36);
   inlineKeyboard = [
     [
-      { text: buttons.approve || '🟢 Approve', callback_data: `approval:approve:${approvalId}` },
-      { text: buttons.reject || '🔴 Reject', callback_data: `approval:reject:${approvalId}` },
+      { text: buttons.approve || 'Approve', callback_data: `approval:approve:${approvalId}` },
+      { text: buttons.reject || 'Reject', callback_data: `approval:reject:${approvalId}` },
     ],
   ];
 }
