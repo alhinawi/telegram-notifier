@@ -88,5 +88,14 @@
     "language_title": "*Choose notification and control language:*",
     "language_switched_alert": "Language switched to English",
     "language_switched": "*Language switched successfully!*\nCurrent language: English\n\nAll future notifications and responses will be in English."
+  },
+  "commands": {
+    "projects": "Browse and switch recent projects",
+    "cd": "Switch or view active workspace directory",
+    "dirs": "View and manage workspace folders",
+    "language": "Change bot and notification language",
+    "status": "Daemon health and active task status",
+    "stop": "Stop currently running task",
+    "help": "Help guide and list of commands"
   }
 }

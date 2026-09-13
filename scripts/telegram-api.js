@@ -148,8 +148,8 @@ class TelegramClient {
     return this.request('answerCallbackQuery', payload);
   }
 
-  setMyCommands(commands = []) {
-    return this.request('setMyCommands', { commands });
+  setMyCommands(commands = [], options = {}) {
+    return this.request('setMyCommands', { commands, ...options });
   }
 }
 

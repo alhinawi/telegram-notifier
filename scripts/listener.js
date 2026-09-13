@@ -147,6 +147,37 @@ function formatTelegramOutput(text, maxLength = 3500) {
 	);
 }
 
+async function registerBotCommands(client, activeLang = "ar") {
+	function getCommandsForLang(langCode) {
+		return [
+			{ command: "projects", description: i18n.t("commands.projects", langCode) },
+			{ command: "cd", description: i18n.t("commands.cd", langCode) },
+			{ command: "dirs", description: i18n.t("commands.dirs", langCode) },
+			{ command: "language", description: i18n.t("commands.language", langCode) },
+			{ command: "status", description: i18n.t("commands.status", langCode) },
+			{ command: "stop", description: i18n.t("commands.stop", langCode) },
+			{ command: "help", description: i18n.t("commands.help", langCode) },
+		];
+	}
+
+	// 1. Set default commands matching the active language
+	try {
+		await client.setMyCommands(getCommandsForLang(activeLang));
+	} catch (e) {
+		console.warn(`Could not register default commands: ${e.message}`);
+	}
+
+	// 2. Also register localized command sets for supported languages
+	const supported = ["ar", "en"];
+	for (const l of supported) {
+		try {
+			await client.setMyCommands(getCommandsForLang(l), { language_code: l });
+		} catch {
+			// Ignore
+		}
+	}
+}
+
 async function main() {
 	const env = loadEnv();
 	const botToken = env.TELEGRAM_BOT_TOKEN;
@@ -186,20 +217,14 @@ async function main() {
 		process.exit(1);
 	}
 
-	// Register bot commands
-	try {
-		await client.setMyCommands([
-			{ command: "projects", description: "عرض واختيار المشاريع الأخيرة" },
-			{ command: "cd", description: "تغيير أو عرض مجلد المشروع النشط" },
-			{ command: "dirs", description: "عرض وإدارة مجلدات المشاريع" },
-			{ command: "language", description: "تغيير لغة البوت والإشعارات" },
-			{ command: "status", description: "حالة الـ Daemon والمشروع النشط" },
-			{ command: "stop", description: "إيقاف المهمة الجارية حالياً" },
-			{ command: "help", description: "المساعدة وقائمة الأوامر" },
-		]);
-	} catch (e) {
-		console.warn(`Could not register commands: ${e.message}`);
-	}
+	// Register bot commands dynamically based on active language
+	const initialLang = (
+		state.language ||
+		env.LISTENER_LANGUAGE ||
+		env.NOTIFICATION_LANGUAGE ||
+		"ar"
+	).toLowerCase();
+	await registerBotCommands(client, initialLang);
 
 	// Handle SIGINT / SIGTERM
 	const cleanup = () => {
@@ -658,6 +683,9 @@ async function handleCallbackQuery(
 		state.lastActivity = new Date().toISOString();
 		saveState(state);
 		updateEnvLanguage(newLang);
+
+		// Dynamically update Telegram bot commands menu for the newly selected language
+		await registerBotCommands(client, newLang);
 
 		await client.answerCallbackQuery(
 			queryId,
