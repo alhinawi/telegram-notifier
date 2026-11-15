@@ -1,29 +1,27 @@
-# telegram-notifier
+# Telegram Notifier
 
-**Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
+A Node.js command-line notification and optional interactive bridge for development workflows. Send task updates to a Telegram bot, or run a local listener to route approved chat commands to tools on your own machine. This is a CLI/service repository, not a hosted website.
 
-Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
+## What is included
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as You (Telegram)
-    participant Bot as Listener Daemon (Background Service)
-    participant Agent as AI Coding Agent (Gemini / Claude / Aider)
+- Notification scripts and setup wizard.
+- Optional two-way listener with project/workspace commands and approval buttons.
+- Background-service management for the supported desktop platforms.
+- Integration guides for common coding tools and local workflows.
 
-    User->>Bot: /projects
-    Bot->>User: Displays Recent Projects with Inline Buttons
-    User->>Bot: Taps project button (Switch Workspace)
-    Bot->>User: Switched to selected project
-    User->>Bot: Sends prompt: "Fix the login authentication bug"
-    Bot->>User: "Starting task in project..."
-    Bot->>Agent: Runs CLI agent in active workspace
-    Agent->>Agent: Executes code / runs tests
-    Agent->>Bot: Completes task with output
-    Bot->>User: Result notification: "Task Finished Successfully"
+## Stack and local setup
+
+Node.js scripts, Telegram Bot API and operating-system service helpers. There is no frontend build step.
+
+```bash
+npm install --ignore-scripts   # install without starting the setup wizard
+npm run setup                 # interactive, asks for bot configuration
+npm run service:status
 ```
 
----
+The package has a `postinstall` setup hook, so a plain `npm install` runs the wizard automatically. Review the service-install prompts before allowing background startup. Only enable remote execution for a bot/chat you control. Keep bot tokens and local configuration out of git, limit workspace access, and stop the listener when it is not needed. Do not send credentials or private source through Telegram notifications.
+
+The reference guide below covers commands, integration examples and service management. Run only the integrations you deliberately choose to install.
 
 ## Quick Start
 
