@@ -1,0 +1,3 @@
+# Keep deterministic formatting on Windows checkouts too.
+* text=auto eol=lf
+*.png binary

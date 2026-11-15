@@ -3,7 +3,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "notifier-sec-"));
+const root = fs.realpathSync(
+	fs.mkdtempSync(path.join(os.tmpdir(), "notifier-sec-")),
+);
 process.env.TELEGRAM_NOTIFIER_STATE_DIR = path.join(root, "state");
 const store = require("../scripts/state");
 const {
