@@ -1,221 +1,181 @@
-# telegram-notifier
+![Telegram Notifier: your work, your phone, your control](assets/banner.svg)
 
-**Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
+# Telegram Notifier
 
-Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
+### Your work. Your phone. Your control.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as You (Telegram)
-    participant Bot as Listener Daemon (Background Service)
-    participant Agent as AI Coding Agent (Gemini / Claude / Aider)
+Reliable task updates and an opt-in control bridge for AI coding agents.
 
-    User->>Bot: /projects
-    Bot->>User: Displays Recent Projects with Inline Buttons
-    User->>Bot: Taps project button (Switch Workspace)
-    Bot->>User: Switched to selected project
-    User->>Bot: Sends prompt: "Fix the login authentication bug"
-    Bot->>User: "Starting task in project..."
-    Bot->>Agent: Runs CLI agent in active workspace
-    Agent->>Agent: Executes code / runs tests
-    Agent->>Bot: Completes task with output
-    Bot->>User: Result notification: "Task Finished Successfully"
-```
+**Zero runtime dependencies · English + Arabic · Node.js 20+ · MIT**
+
+[Quick start](#quick-start) · [Notifications](#notifications) · [Remote control](#optional-remote-control) · [Upgrade from v1](docs/MIGRATION.md) · [Security](SECURITY.md)
 
 ---
 
-## Quick Start
+Get a concise update when a build finishes. Review an approval request from your phone. When you choose, send your AI CLI a prompt from Telegram, switch projects, or stop a running task.
 
-Install and set up the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf) in one command:
+Version 2 fixes the control bridge's shell execution, setup hangs, nonfunctional approval handoff, stale project buttons, formatting failures, and unbounded network/process waits. Installation is now quiet and remote execution is **off by default**.
+
+## What is included
+
+| Capability            | What it does                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| Task updates          | Success, approval, error, info, and alert events, with English and Arabic templates    |
+| Safe message delivery | Plain text, Unicode-safe splitting, silent mode, forum topics, file/stdin input        |
+| Reliable transport    | Request deadlines, bounded read retries, Telegram rate-limit handling, redacted errors |
+| Real decision records | Message-bound, single-use approval/rejection records with one-hour expiry              |
+| Project control       | Stable project selection, relative `/cd`, file lists, language switching, task status  |
+| Explicit execution    | Direct process arguments, one task at a time, bounded output, timeout, stop escalation |
+| Local diagnostics     | Offline config checks and optional bot-identity verification, without sending messages |
+| Test coverage         | Node's built-in test runner; CI across Node 20/22/24 and Linux/macOS/Windows           |
+
+## Quick start
+
+```bash
+git clone https://github.com/alhinawi/telegram-notifier.git
+cd telegram-notifier
+npm ci --ignore-scripts
+npm run setup
+npm run doctor
+```
+
+Create a bot with Telegram's **@BotFather** before setup. The terminal wizard hides the token, verifies the bot, and can pair your private chat using a random `/start` challenge. Configuration is saved with owner-only file permissions on POSIX systems. Global plugin copying, a test message, remote execution, and service installation each require your choice.
+
+For an agent skill description you can use:
 
 ```bash
 npx skills add alhinawi/telegram-notifier
 ```
 
-The interactive setup wizard will run automatically to:
+A skill install does not automatically run the runtime wizard or start a service. Ensure the scripts and locales are present, then run setup explicitly from the installed repository. No published npm registry package is required by the clone-based installation above.
 
-1. Connect your Telegram Bot Token and auto-detect your Chat ID.
-2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
-3. Set your preferred AI Agent CLI tool (`gemini`, `claude`, `aider`).
-4. Auto-install and start the background daemon service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
+### CI or manual configuration
 
----
+Supply `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` through your CI secret store, or copy `.env.example` to `.env` locally. Never commit the filled file. `npm run doctor` reports only whether configuration is present, not its values.
 
-## How to Update
-
-To update the skill to the latest version at any time:
+## Notifications
 
 ```bash
-npx skills update alhinawi/telegram-notifier
+node scripts/notify.js --type task_finished --project my-app \
+  --message 'Summary: Fixed login validation. Validation: Tests passed. Status: Ready for review.'
+
+node scripts/notify.js --type error --lang ar --message 'فشل البناء. راجع السجل المحلي.'
+
+# Check the exact message without credentials, network traffic, or a send.
+node scripts/notify.js --dry-run --title 'Release check' --message 'Ready for review.'
+
+# Machine-readable message IDs, quiet delivery, and a forum topic.
+node scripts/notify.js --type info --message 'Nightly build passed.' \
+  --silent --thread-id 123 --json
 ```
 
----
-
-## Two-Way Interactive Bridge
-
-With the interactive daemon running, your Telegram Bot becomes a full two-way command center:
-
-### Telegram Commands
-
-| Command            | Action                                                                                   |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| `/projects`        | Displays your most recently edited projects with inline buttons to switch workspace      |
-| `/cd <path/name>`  | Switch active project directory directly (supports `~`, relative paths, or project name) |
-| `/ls [path]`       | List files and directories inside the active workspace project                           |
-| `/dirs`            | View scanned workspace roots and active directory                                        |
-| `/language`        | Switch notification and bot language via clickable interactive list                      |
-| `/status`          | Shows daemon health, active project, git branch, and running task status                 |
-| `/stop`            | Aborts the currently executing task on your machine                                      |
-| `/help`            | Shows command guide and instructions                                                     |
-| _Any text message_ | Executed immediately as a prompt by your AI Agent inside the active workspace            |
-
-### Interactive Approval Buttons
-
-When an AI Agent requests human feedback or approval, it sends interactive buttons directly to your Telegram chat:
-
-- **Approve / موافق**
-- **Reject / رفض**
-
-Tapping the button immediately sends your decision back to the running process.
-
----
-
-## Background Daemon Service Management
-
-The daemon can run in the foreground or as a persistent system background service:
+For literal multiline input containing quotes, dollar signs, or backticks:
 
 ```bash
-# Foreground run (useful for testing)
+node scripts/notify.js --type info --message-file - <<'MESSAGE'
+Build report
+No shell expansion: $HOME, `code`, and $(commands) remain text.
+MESSAGE
+```
+
+Types: `task_finished`, `approval_required`, `error`, `info`, `alert`. Common aliases such as `done`, `success`, `approval`, and `failed` remain supported. Unknown flags and event types fail clearly. Long messages are split safely below Telegram's size limit. Markdown-like text is delivered literally, so project names such as `my_app` do not break parsing.
+
+Language precedence: `--lang`, saved `/language` preference, `NOTIFICATION_LANGUAGE`, English. Use `--no-buttons` for an informational approval event without decision buttons.
+
+### Approvals that scripts can read
+
+```bash
+node scripts/notify.js --type approval_required \
+  --message 'Approve deploying reviewed commit abc123?' --json
+# Returns {"ok":true,"messageIds":[...],"approvalId":"..."}
+
+node scripts/approval.js <approvalId>
+# JSON status; exit 0 = approved, 2 = rejected, 3 = pending/expired/missing
+```
+
+Run `npm run daemon` to process clicks. The sending CLI does not wait. The workflow consuming the result decides whether to continue and must check its own action permissions. A button records a decision, not an automatic deployment. Decisions are chat/message-bound, expire in one hour while pending, and reject repeated or mismatched callbacks. Sender and listener must use the same local state directory.
+
+## Optional remote control
+
+Read-only bot commands and approval processing work without enabling prompt execution:
+
+```bash
 npm run daemon
+```
 
-# Install as background service (auto-starts on system boot)
+If you want Telegram text to run your local AI CLI, set these locally and restart:
+
+```dotenv
+ALLOW_REMOTE_EXECUTION=true
+WORKSPACE_DIRS=~/workspace,~/Projects
+AI_AGENT_CLI=claude
+AI_AGENT_ARGS=[]
+TASK_TIMEOUT=600
+```
+
+`AI_AGENT_CLI` is an executable name or full path, not a shell command. Put additional arguments in the JSON array `AI_AGENT_ARGS`. Adapters cover Gemini/Claude/Antigravity (`-p`), Aider (`--message`), and Codex (`exec`). Other executables receive the prompt as their final argument. The selected CLI must already be installed, signed in, and able to run noninteractively.
+
+| Command              | Behavior                                                                  |
+| -------------------- | ------------------------------------------------------------------------- |
+| `/projects`          | Recent projects inside configured roots; stable, single-selection buttons |
+| `/cd <path or name>` | Switch within allowed roots; relative paths use the active project        |
+| `/ls [path]`         | List non-hidden files and directories without leaving allowed roots       |
+| `/dirs`              | Show configured scan roots                                                |
+| `/language`          | Switch English/Arabic and the chat's command menu                         |
+| `/status`            | Active project, language, execution setting, task status                  |
+| `/stop`              | Request termination; force-kill after three seconds if needed             |
+| `/help`              | Usage and current workspace                                               |
+
+Only one task runs at a time. Polling stays responsive while it runs. Unknown slash commands do not become prompts. Old queued messages are discarded on fresh startup, so a stopped computer does not later execute a backlog of work. Use a dedicated bot: startup discards that bot's pending updates and only one poller can own it.
+
+Private chats require both the configured chat ID and matching sender ID. Group control additionally requires `TELEGRAM_ALLOWED_USER_IDS=123,456`. Bot senders are rejected. These checks control who can request work; **they are not an OS sandbox**. The AI CLI retains its normal filesystem and account privileges. Keep remote execution disabled unless you understand that access.
+
+### Background services
+
+```bash
 npm run service:install
-
-# Check background service status and logs
 npm run service:status
-
-# Stop and uninstall background service
-npm run service:uninstall
-
-# Restart background service
 npm run service:restart
+npm run service:uninstall
 ```
 
-### Supported Operating Systems
+macOS uses a user launchd agent; Linux uses a systemd user service and needs a working user session. Windows installs a Startup launcher for the **next login**, not an immediate scheduled task. Windows uninstall removes that launcher but does not kill a listener already running. Use `/stop` for its task and close its process separately. OS service installation has not been exercised by the portable unit tests; templates and quoting are tested. Linux service logs are available through `journalctl --user -u telegram-notifier.service`; macOS and Windows use `~/.telegram-notifier/logs`.
 
-- **macOS**: Configures a user `launchd` agent in `~/Library/LaunchAgents/com.telegram-notifier.daemon.plist`
-- **Linux**: Configures a user `systemd` unit in `~/.config/systemd/user/telegram-notifier.service`
-- **Windows**: Configures startup launcher in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
+## Configuration
 
----
+| Variable                      | Default / purpose                                            |
+| ----------------------------- | ------------------------------------------------------------ |
+| `TELEGRAM_BOT_TOKEN`          | Required secret from BotFather                               |
+| `TELEGRAM_CHAT_ID`            | Required numeric recipient ID                                |
+| `NOTIFICATION_LANGUAGE`       | `en`; notification fallback language                         |
+| `LISTENER_LANGUAGE`           | Optional control-language fallback                           |
+| `WORKSPACE_DIRS`              | Comma-separated roots; current directory only when omitted   |
+| `AI_AGENT_CLI`                | `gemini`; executable, never a shell expression               |
+| `AI_AGENT_ARGS`               | `[]`; extra CLI arguments as a JSON string array             |
+| `TASK_TIMEOUT`                | `600`; valid range 1..86400 seconds                          |
+| `ALLOW_REMOTE_EXECUTION`      | `false`; set exactly `true` to enable                        |
+| `TELEGRAM_ALLOWED_USER_IDS`   | Explicit sender IDs required for group control               |
+| `MAX_UPDATE_AGE`              | `120`; ignore messages older than this many seconds          |
+| `TELEGRAM_NOTIFIER_CONFIG`    | Optional explicit config file path                           |
+| `TELEGRAM_NOTIFIER_STATE_DIR` | Default `~/.telegram-notifier`; approvals and listener state |
 
-## 1-Click Prompt for AI Agents
+Precedence: process environment, explicit config, current-directory `.env`, repository `.env`, global Gemini plugin `.env`. An explicitly empty environment variable stays empty. Quoted values and `export KEY=value` are supported. State files contain workspace paths, language preferences and decisions, not bot tokens. Keep them private.
 
-Give this prompt to your AI Agent (Antigravity, Claude Code, Cursor, Windsurf, Copilot) to install and configure everything automatically:
+## Diagnostics and development
 
-### English Prompt
-
-```text
-Please install and configure the telegram-notifier skill by running `npx skills add alhinawi/telegram-notifier` (or via https://github.com/alhinawi/telegram-notifier). Follow the setup instructions to configure the bot token and chat ID, and make sure to automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
+```bash
+npm run doctor                 # Offline, no message sent
+npm run doctor -- --online     # Verify bot identity with getMe, no message sent
+npm run check                  # Check every JavaScript file's syntax
+npm test                       # Regression and security tests; no Telegram account needed
+npm run test:coverage
+npm pack --dry-run             # Inspect distributable contents
 ```
 
-### Arabic Prompt (برومبت بالعربي)
+No runtime dependencies. Tests use fake Telegram responses and temporary directories, plus real local child processes to check argument safety and timeouts. They never send real notifications, enable services, or run an AI provider.
 
-```text
-من فضلك قم بتثبيت وإعداد مهارة telegram-notifier عبر تشغيل الأمر `npx skills add alhinawi/telegram-notifier` (أو من المستودع https://github.com/alhinawi/telegram-notifier). اتبع خطوات الإعداد لربط الـ Bot Token والـ Chat ID، واحرص على إرسال إشعار تليجرام تلقائياً في كل مرة تنتهي فيها من مهمة، أو تحتاج إذني وموافقتي، أو عند حدوث أي خطأ بدون أن أحتاج لتشغيلها يدوياً.
-```
-
----
-
-## Language Options & Presets
-
-You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or specify `--lang` per call:
-
-| Event Type                 | English (`en`)      | Arabic (`ar`)           |
-| -------------------------- | ------------------- | ----------------------- |
-| `--type=task_finished`     | `Task Finished`     | `اكتملت المهمة بنجاح`   |
-| `--type=approval_required` | `Approval Required` | `مطلوب مراجعة وتأكيد`   |
-| `--type=error`             | `Error Occurred`    | `حدث خطأ أثناء التنفيذ` |
-
----
-
-## How AI Agents Trigger Notifications
-
-### 1. Installed via Skills CLI (Recommended)
-
-When installed via `npx skills add alhinawi/telegram-notifier`, your AI Agent (Cursor, Claude Code, Antigravity, Windsurf) automatically discovers the skill from `SKILL.md` and triggers notifications without manual configuration.
-
-### 2. Antigravity & Gemini CLI
-
-Installed globally via `npm run setup` in `~/.gemini/config/plugins/telegram-notifier/` or via `npx skills add alhinawi/telegram-notifier -g`. The agent detects the skill and triggers it automatically.
-
-### 3. Claude Code
-
-Install via `npx skills add alhinawi/telegram-notifier -a claude-code` or instruct in `CLAUDE.md`:
-
-```markdown
-When completing any task, needing human approval, or encountering an error:
-Execute `node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"`
-```
-
-### 4. Cursor & Windsurf
-
-Install via `npx skills add alhinawi/telegram-notifier` or add to `.cursorrules` / `.windsurfrules`:
-
-```markdown
-When completing any task, needing human approval, or encountering an error:
-Execute `node /path/to/telegram-notifier/scripts/notify.js --type=task_finished`
-```
-
----
-
-## Remote Desktop & Mobile Control Guide (التحكم في الكمبيوتر من الموبايل)
-
-### Option 1: Parsec (Recommended for Android / PC / Mac)
-
-[Parsec](https://parsec.app/) is a free, ultra-low latency, 60 FPS remote desktop application. It lets you control your PC from your smartphone with zero perceived lag and full desktop interactivity.
-
-#### A. PC Host Setup (Desktop / Workstation)
-
-1. Download and install **Parsec** from [parsec.app](https://parsec.app/).
-2. Create a free account and log in.
-3. In **Settings -> Host**, ensure **Hosting** is set to `Enabled`.
-4. Keep Parsec running in the background.
-
-#### B. Mobile App Setup (Android)
-
-1. Download **Parsec** from Google Play Store.
-2. Log in with the **same account** used on your PC.
-3. Under **Computers**, tap **Connect** to mirror your PC screen with touch/mouse controls!
-
----
-
-### Option 2: TeamViewer (Recommended for iPhone / iOS Users)
-
-For iPhone (iOS) users, [TeamViewer](https://www.teamviewer.com/) provides a smooth, reliable remote desktop experience:
-
-#### A. PC Host Setup
-
-1. Download and install **TeamViewer Remote** from [teamviewer.com](https://www.teamviewer.com/).
-2. Create a free account and log in.
-3. Enable **Easy Access** under Security Settings to connect without typing a password every time.
-
-#### B. iPhone (iOS) App Setup
-
-1. Download **TeamViewer Remote Control** from the [App Store](https://apps.apple.com/app/teamviewer-remote-control/id692035811).
-2. Log in with the same account and tap on your PC under **My Devices** to connect instantly!
-
----
-
-## Security Notice
-
-- **Strict Authorization**: The listener daemon checks every incoming message's Chat ID against `TELEGRAM_CHAT_ID`. Only you can trigger commands.
-- **Never commit `.env` to Git repositories.** `.gitignore` is pre-configured to protect your secrets.
-- Always keep your `TELEGRAM_BOT_TOKEN` private. If leaked, revoke it via `@BotFather` using `/revoke`.
-
----
+See [migration notes](docs/MIGRATION.md), [troubleshooting](docs/TROUBLESHOOTING.md), [security](SECURITY.md), and [changes](CHANGELOG.md).
 
 ## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+MIT. Created by Mohamed Alhinawi.
