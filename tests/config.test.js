@@ -110,3 +110,15 @@ test("package never runs setup on install and versions agree", () => {
 	assert.equal(pkg.version, plugin.version);
 	assert.equal(pkg.engines.node, ">=20");
 });
+test("setup updates notifier keys without deleting unrelated project config", () => {
+	const file = path.join(root, "shared.env");
+	fs.writeFileSync(
+		file,
+		'DATABASE_URL="postgres://example/local"\nTELEGRAM_CHAT_ID="1"\n',
+	);
+	saveEnv({ TELEGRAM_CHAT_ID: "42" }, file);
+	assert.deepEqual(parseEnv(fs.readFileSync(file, "utf8")), {
+		DATABASE_URL: "postgres://example/local",
+		TELEGRAM_CHAT_ID: "42",
+	});
+});

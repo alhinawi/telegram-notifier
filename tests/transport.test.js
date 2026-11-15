@@ -147,3 +147,43 @@ test("poll payload preserves offset, timeout and allowed updates", async () => {
 	});
 });
 module.exports = { transport };
+test("absolute deadline rejects even if socket idle timeout never fires", async () => {
+	const hanging = {
+		request() {
+			const req = new EventEmitter();
+			req.setTimeout = () => {};
+			req.end = () => {};
+			req.destroy = (err) => req.emit("error", err);
+			return req;
+		},
+	};
+	await assert.rejects(
+		new TelegramClient("123:test", {
+			transport: hanging,
+			timeoutMs: 15,
+		}).sendMessage(1, "x"),
+		/deadline exceeded/,
+	);
+});
+test("JSON null response fails cleanly rather than throwing in an event handler", async () => {
+	const mock = transport([{ raw: "null" }]);
+	await assert.rejects(
+		new TelegramClient("123:test", { transport: mock }).sendMessage(1, "x"),
+		/Invalid response schema/,
+	);
+});
+test("long rate limit fails rather than retrying earlier than requested", async () => {
+	const mock = transport([
+		{
+			code: 429,
+			body: { ok: false, error_code: 429, parameters: { retry_after: 120 } },
+		},
+	]);
+	await assert.rejects(
+		new TelegramClient("123:test", {
+			transport: mock,
+			sleep: async () => assert.fail("must not retry early"),
+		}).sendMessage(1, "x"),
+	);
+	assert.equal(mock.calls.length, 1);
+});

@@ -100,6 +100,15 @@ class TelegramClient {
 	}
 	requestOnce(method, payload) {
 		return new Promise((resolve, reject) => {
+			let deadline;
+			const fail = (err) => {
+				clearTimeout(deadline);
+				reject(err);
+			};
+			const succeed = (value) => {
+				clearTimeout(deadline);
+				resolve(value);
+			};
 			const body = JSON.stringify(payload);
 			const req = this.transport.request(
 				{
@@ -116,12 +125,10 @@ class TelegramClient {
 					let data = "";
 					res.setEncoding?.("utf8");
 					res.on("error", () =>
-						reject(
-							new TelegramError("Telegram response interrupted", "NETWORK"),
-						),
+						fail(new TelegramError("Telegram response interrupted", "NETWORK")),
 					);
 					res.on("aborted", () =>
-						reject(new TelegramError("Telegram response aborted", "NETWORK")),
+						fail(new TelegramError("Telegram response aborted", "NETWORK")),
 					);
 					res.on("data", (chunk) => {
 						data += chunk;
@@ -138,18 +145,25 @@ class TelegramClient {
 						try {
 							parsed = JSON.parse(data);
 						} catch {
-							return reject(
+							return fail(
 								new TelegramError("Invalid JSON from Telegram", res.statusCode),
 							);
 						}
+						if (!parsed || typeof parsed !== "object")
+							return fail(
+								new TelegramError(
+									"Invalid response schema from Telegram",
+									res.statusCode,
+								),
+							);
 						if (parsed.ok && res.statusCode >= 200 && res.statusCode < 300)
-							return resolve(parsed.result);
+							return succeed(parsed.result);
 						const description = String(
 							parsed.description || `Telegram HTTP ${res.statusCode}`,
 						)
 							.split(this.token)
 							.join("[REDACTED]");
-						reject(
+						fail(
 							new TelegramError(
 								description,
 								parsed.error_code || res.statusCode,
@@ -159,11 +173,18 @@ class TelegramClient {
 					});
 				},
 			);
+			deadline = setTimeout(
+				() =>
+					req.destroy(
+						new TelegramError("Telegram request deadline exceeded", "TIMEOUT"),
+					),
+				this.timeoutMs,
+			);
 			req.setTimeout(this.timeoutMs, () =>
 				req.destroy(new TelegramError("Telegram request timed out", "TIMEOUT")),
 			);
 			req.on("error", (err) =>
-				reject(
+				fail(
 					err instanceof TelegramError
 						? err
 						: new TelegramError("Telegram network request failed", "NETWORK"),

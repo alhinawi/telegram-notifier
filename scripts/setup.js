@@ -6,10 +6,17 @@ const os = require("node:os");
 const crypto = require("node:crypto");
 const readline = require("node:readline/promises");
 const { Writable } = require("node:stream");
-const { loadEnv, TelegramClient } = require("./telegram-api");
+const { loadEnv, parseEnv, TelegramClient } = require("./telegram-api");
 const serviceManager = require("./service-manager");
 const i18n = require("./i18n");
 function saveEnv(config, target) {
+	let existing = {};
+	try {
+		existing = parseEnv(fs.readFileSync(target, "utf8"));
+	} catch (err) {
+		if (err.code !== "ENOENT") throw err;
+	}
+	config = { ...existing, ...config };
 	const lines = Object.entries(config).map(([key, value]) => {
 		if (/[\r\n]/.test(String(value)))
 			throw new Error("Configuration values cannot contain newlines");
