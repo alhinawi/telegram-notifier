@@ -52,34 +52,18 @@ function getWorkspaceDirs() {
 		.filter(Boolean)
 		.map(expandHome);
 
-	const stored = getStoredWorkspaceDirs().map(expandHome);
-
-	// Always ensure current working directory is included
-	const list = [...parsed, ...stored, process.cwd()];
-
-	const home = os.homedir();
-	const defaults = [
-		path.join(home, "workspace", "personal"),
-		path.join(home, "workspace"),
-		path.join(home, "Projects"),
-		path.join(home, "Developer"),
-	];
-
-	for (const def of defaults) {
-		if (!list.includes(def)) {
-			list.push(def);
-		}
-	}
-
+	const list = parsed.length ? parsed : [process.cwd()];
 	return [
 		...new Set(
-			list.filter((d) => {
-				try {
-					return fs.existsSync(d);
-				} catch {
-					return false;
-				}
-			}),
+			list
+				.filter((d) => {
+					try {
+						return fs.statSync(d).isDirectory();
+					} catch {
+						return false;
+					}
+				})
+				.map((d) => fs.realpathSync(d)),
 		),
 	];
 }
@@ -89,7 +73,16 @@ function getWorkspaceDirs() {
  */
 function getGitBranch(projectPath) {
 	try {
-		const headPath = path.join(projectPath, ".git", "HEAD");
+		let gitDir = path.join(projectPath, ".git");
+		if (fs.statSync(gitDir).isFile()) {
+			const match = fs
+				.readFileSync(gitDir, "utf8")
+				.trim()
+				.match(/^gitdir: (.+)$/);
+			if (!match) return null;
+			gitDir = path.resolve(projectPath, match[1]);
+		}
+		const headPath = path.join(gitDir, "HEAD");
 		if (fs.existsSync(headPath)) {
 			const content = fs.readFileSync(headPath, "utf8").trim();
 			if (content.startsWith("ref: refs/heads/")) {
@@ -232,7 +225,7 @@ function formatProjectsMessage(projects, activePath = "", lang = "en") {
 	const noneFound = i18n.t("projects.none_found", lang);
 
 	if (projects.length === 0) {
-		return `${title}\n\n_${noneFound}_`;
+		return `${title}\n\n${noneFound}`;
 	}
 
 	const lines = [title, ""];
@@ -243,10 +236,10 @@ function formatProjectsMessage(projects, activePath = "", lang = "en") {
 			activePath && path.resolve(proj.path) === path.resolve(activePath);
 		const activeBadge = isActive ? i18n.t("projects.active_badge", lang) : "";
 		const timeAgo = formatTimeAgo(proj.mtime, lang);
-		const branchInfo = proj.branch ? ` \`[${proj.branch}]\`` : "";
-		const timeInfo = timeAgo ? ` _(${timeAgo})_` : "";
+		const branchInfo = proj.branch ? ` [${proj.branch}]` : "";
+		const timeInfo = timeAgo ? ` (${timeAgo})` : "";
 
-		lines.push(`${num} *${proj.name}*${activeBadge}${branchInfo}${timeInfo}`);
+		lines.push(`${num} ${proj.name}${activeBadge}${branchInfo}${timeInfo}`);
 	});
 
 	lines.push(i18n.t("projects.footer", lang));

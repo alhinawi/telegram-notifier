@@ -1,15 +1,15 @@
 {
 	"name": "telegram-notifier",
-	"version": "1.1.0",
+	"version": "2.0.0",
 	"description": "Universal Telegram Notifier for AI Agents (Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, CI/CD, Git Hooks)",
 	"main": "scripts/notify.js",
 	"bin": {
 		"telegram-notifier": "scripts/setup.js",
 		"agent-notify": "scripts/notify.js",
-		"telegram-listener": "scripts/listener.js"
+		"telegram-listener": "scripts/listener.js",
+		"telegram-doctor": "scripts/doctor.js"
 	},
 	"scripts": {
-		"postinstall": "node scripts/setup.js",
 		"setup": "node scripts/setup.js",
 		"notify": "node scripts/notify.js",
 		"detect-chat-id": "node scripts/auto-detect-chat-id.js",
@@ -19,7 +19,13 @@
 		"service:uninstall": "node scripts/service-manager.js uninstall",
 		"service:status": "node scripts/service-manager.js status",
 		"service:restart": "node scripts/service-manager.js restart",
-		"format": "npx prettier . --write"
+		"format": "prettier . --write",
+		"test": "node --test",
+		"test:coverage": "node --test --experimental-test-coverage",
+		"doctor": "node scripts/doctor.js",
+		"approval": "node scripts/approval.js",
+		"check": "node scripts/check.js",
+		"format:check": "prettier . --check"
 	},
 	"keywords": [
 		"telegram",
@@ -34,5 +40,28 @@
 		"remote-dev"
 	],
 	"author": "Mohamed Alhinawi",
-	"license": "MIT"
+	"license": "MIT",
+	"engines": {
+		"node": ">=20"
+	},
+	"files": [
+		"scripts/",
+		"locales/",
+		"SKILL.md",
+		"plugin.json",
+		".env.example",
+		"README.md",
+		"LICENSE",
+		"docs/",
+		"SECURITY.md",
+		"CHANGELOG.md",
+		"assets/"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/alhinawi/telegram-notifier.git"
+	},
+	"devDependencies": {
+		"prettier": "3.6.2"
+	}
 }

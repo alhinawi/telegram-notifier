@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">Telegram Notifier</title><desc id="desc">Your work. Your phone. Your control. Zero-dependency task notifications and an opt-in AI agent bridge.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1120"/><stop offset="1" stop-color="#142d46"/></linearGradient><linearGradient id="accent" x2="1" y2="1"><stop stop-color="#67e8f9"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs>
+<rect width="1200" height="380" rx="24" fill="url(#bg)"/>
+<circle cx="1100" cy="80" r="205" fill="#38bdf8" opacity=".055"/><circle cx="1100" cy="80" r="150" fill="none" stroke="#38bdf8" opacity=".1"/>
+<rect x="60" y="48" width="188" height="30" rx="15" fill="#163b4a"/><circle cx="78" cy="63" r="4" fill="#6ee7b7"/>
+<g font-family="Arial,Helvetica,sans-serif"><text x="92" y="68" fill="#a7f3d0" font-size="12" letter-spacing="1.6">BUILT FOR YOUR WORKFLOW</text>
+<text x="60" y="149" fill="#f8fafc" font-size="59" font-weight="700" letter-spacing="-2">Telegram Notifier</text>
+<text x="64" y="201" fill="#7dd3fc" font-size="28">Your work. Your phone. Your control.</text>
+<text x="64" y="246" fill="#bac9da" font-size="18">Task updates and an opt-in bridge for AI coding agents.</text>
+<g font-size="13" fill="#d8e8f5"><rect x="64" y="282" width="150" height="34" rx="8" fill="#1e3a50"/><text x="82" y="304">Zero dependencies</text><rect x="225" y="282" width="138" height="34" rx="8" fill="#1e3a50"/><text x="243" y="304">English + Arabic</text><rect x="374" y="282" width="117" height="34" rx="8" fill="#1e3a50"/><text x="393" y="304">Node.js 20+</text></g>
+<g transform="translate(870 76)"><rect x="0" width="218" height="236" rx="24" fill="#0b1728" stroke="#33516a" stroke-width="2"/><rect x="74" y="13" width="70" height="5" rx="3" fill="#33516a"/>
+<circle cx="42" cy="57" r="16" fill="url(#accent)"/><path d="M32 57l21-8-5 20-6-7-5 4 1-8z" fill="#0b1728"/>
+<text x="69" y="55" fill="#e2e8f0" font-size="13" font-weight="700">Task finished</text><text x="69" y="73" fill="#94a3b8" font-size="10">my-project / just now</text>
+<rect x="21" y="99" width="175" height="1" fill="#233c52"/>
+<text x="23" y="128" fill="#dbeafe" font-size="12">Build passed.</text><text x="23" y="148" fill="#94a3b8" font-size="12">Ready for your review.</text>
+<rect x="21" y="174" width="175" height="35" rx="8" fill="#123c50"/><text x="49" y="196" fill="#7dd3fc" font-size="12">You stay in control</text></g></g>
+</svg>

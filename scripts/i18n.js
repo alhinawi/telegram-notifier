@@ -35,6 +35,8 @@ function findLocalesDir() {
 const localesCache = new Map();
 
 function loadLocaleFile(lang) {
+	lang = String(lang).toLowerCase();
+	if (!/^[a-z]{2}(?:-[a-z]{2})?$/.test(lang)) lang = "en";
 	if (localesCache.has(lang)) {
 		return localesCache.get(lang);
 	}

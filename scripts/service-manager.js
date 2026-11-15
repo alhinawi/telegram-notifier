@@ -9,7 +9,28 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
+const xml = (value) =>
+	String(value)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&apos;");
+const unit = (value) =>
+	'"' +
+	String(value)
+		.replace(/\\/g, "\\\\")
+		.replace(/"/g, '\\"')
+		.replace(/%/g, "%%")
+		.replace(/\n/g, "\\n") +
+	'"';
+function run(command, args) {
+	return execFileSync(command, args, {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "pipe"],
+	});
+}
 
 const SERVICE_NAME = "com.telegram-notifier.daemon";
 const LINUX_SERVICE_NAME = "telegram-notifier.service";
@@ -64,25 +85,25 @@ function generateMacPlist() {
     <string>${SERVICE_NAME}</string>
     <key>ProgramArguments</key>
     <array>
-        <string>${nodeBinary}</string>
-        <string>${scriptPath}</string>
+        <string>${xml(nodeBinary)}</string>
+        <string>${xml(scriptPath)}</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>WorkingDirectory</key>
-    <string>${projectRoot}</string>
+    <string>${xml(projectRoot)}</string>
     <key>StandardOutPath</key>
-    <string>${outLog}</string>
+    <string>${xml(outLog)}</string>
     <key>StandardErrorPath</key>
-    <string>${errLog}</string>
+    <string>${xml(errLog)}</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>${process.env.PATH || "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"}</string>
+        <string>${xml(process.env.PATH || "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin")}</string>
         <key>HOME</key>
-        <string>${homeDir}</string>
+        <string>${xml(homeDir)}</string>
     </dict>
 </dict>
 </plist>
@@ -107,12 +128,12 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=${nodeBinary} ${scriptPath}
-WorkingDirectory=${projectRoot}
+ExecStart=${unit(nodeBinary)} ${unit(scriptPath)}
+WorkingDirectory=${unit(projectRoot)}
 Restart=always
 RestartSec=5
-Environment=PATH=${process.env.PATH || "/usr/local/bin:/usr/bin:/bin"}
-Environment=HOME=${homeDir}
+Environment=${unit("PATH=" + (process.env.PATH || "/usr/local/bin:/usr/bin:/bin"))}
+Environment=${unit("HOME=" + homeDir)}
 
 [Install]
 WantedBy=default.target
@@ -140,6 +161,12 @@ function generateWindowsVbs() {
 	const { nodeBinary, scriptPath, logDir } = getPaths();
 	const outLog = path.join(logDir, "daemon.out.log");
 	const errLog = path.join(logDir, "daemon.err.log");
+	for (const value of [nodeBinary, scriptPath, outLog, errLog]) {
+		if (/["%\r\n&|<>^!]/.test(value))
+			throw new Error(
+				"Windows service paths contain unsupported command characters; run the daemon manually",
+			);
+	}
 
 	return `Set WshShell = CreateObject("WScript.Shell")
 WshShell.Run "cmd /c ""${nodeBinary}"" ""${scriptPath}"" >> ""${outLog}"" 2>> ""${errLog}""", 0, False
@@ -163,7 +190,7 @@ function installService() {
 
 		// Stop existing if running
 		try {
-			execSync(`launchctl unload "${plistPath}" 2>/dev/null || true`);
+			run("launchctl", ["unload", plistPath]);
 		} catch {
 			// Ignore
 		}
@@ -172,7 +199,7 @@ function installService() {
 		console.log(`Saved launchd configuration: ${plistPath}`);
 
 		try {
-			execSync(`launchctl load -w "${plistPath}"`);
+			run("launchctl", ["load", "-w", plistPath]);
 			console.log(
 				`Started macOS background service (${SERVICE_NAME}) successfully!`,
 			);
@@ -192,8 +219,8 @@ function installService() {
 		console.log(`Saved systemd user service configuration: ${servicePath}`);
 
 		try {
-			execSync("systemctl --user daemon-reload");
-			execSync(`systemctl --user enable --now ${LINUX_SERVICE_NAME}`);
+			run("systemctl", ["--user", "daemon-reload"]);
+			run("systemctl", ["--user", "enable", "--now", LINUX_SERVICE_NAME]);
 			console.log(
 				`Started Linux user service (${LINUX_SERVICE_NAME}) successfully!`,
 			);
@@ -236,7 +263,7 @@ function uninstallService() {
 		const plistPath = getMacPlistPath();
 		if (fs.existsSync(plistPath)) {
 			try {
-				execSync(`launchctl unload "${plistPath}" 2>/dev/null || true`);
+				run("launchctl", ["unload", plistPath]);
 			} catch {
 				// Ignore
 			}
@@ -248,12 +275,8 @@ function uninstallService() {
 	} else if (platform === "linux") {
 		const servicePath = getLinuxServicePath();
 		try {
-			execSync(
-				`systemctl --user stop ${LINUX_SERVICE_NAME} 2>/dev/null || true`,
-			);
-			execSync(
-				`systemctl --user disable ${LINUX_SERVICE_NAME} 2>/dev/null || true`,
-			);
+			run("systemctl", ["--user", "stop", LINUX_SERVICE_NAME]);
+			run("systemctl", ["--user", "disable", LINUX_SERVICE_NAME]);
 		} catch {
 			// Ignore
 		}
@@ -262,7 +285,7 @@ function uninstallService() {
 			console.log(`Removed ${servicePath}`);
 		}
 		try {
-			execSync("systemctl --user daemon-reload");
+			run("systemctl", ["--user", "daemon-reload"]);
 		} catch {
 			// Ignore
 		}
@@ -296,9 +319,10 @@ function checkStatus() {
 		);
 
 		try {
-			const list = execSync(`launchctl list | grep ${SERVICE_NAME} || true`)
+			const list = run("launchctl", ["list"])
 				.toString()
-				.trim();
+				.split("\n")
+				.find((line) => line.includes(SERVICE_NAME));
 			if (list) {
 				console.log(`- Status: Running (launchd entry: ${list})`);
 			} else {
@@ -309,9 +333,11 @@ function checkStatus() {
 		}
 	} else if (platform === "linux") {
 		try {
-			const status = execSync(
-				`systemctl --user is-active ${LINUX_SERVICE_NAME} 2>/dev/null || echo inactive`,
-			)
+			const status = run("systemctl", [
+				"--user",
+				"is-active",
+				LINUX_SERVICE_NAME,
+			])
 				.toString()
 				.trim();
 			console.log(
@@ -354,4 +380,7 @@ module.exports = {
 	uninstallService,
 	checkStatus,
 	getPaths,
+	generateMacPlist,
+	generateLinuxService,
+	generateWindowsVbs,
 };
