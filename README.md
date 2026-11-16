@@ -1,15 +1,27 @@
+<div align="center">
+
 # telegram-notifier
 
-**Skills** • **AI Agents** • **Two-Way Control Bridge** • **Remote Dev**
+### Skills • Coding Agents • Two-Way Control Bridge • Remote Dev
 
-Universal **Telegram notification & interactive control bridge** for AI coding agents: real-time alerts on your phone whenever tasks finish, human approvals with interactive buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks directly from your smartphone!
+Universal **Telegram notification & interactive control bridge** for coding agents:
+real-time alerts on your phone whenever tasks finish, human approvals with interactive
+buttons, plus **two-way control** to execute prompts, switch workspaces, and stop tasks
+directly from your smartphone.
+
+[![npm](https://img.shields.io/badge/install-npx%20skills%20add-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://github.com/alhinawi/telegram-notifier)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://core.telegram.org/bots)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+
+</div>
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as You (Telegram)
     participant Bot as Listener Daemon (Background Service)
-    participant Agent as AI Coding Agent (Gemini / Claude / Aider)
+    participant Agent as Coding Agent (Claude / Aider / ...)
 
     User->>Bot: /projects
     Bot->>User: Displays Recent Projects with Inline Buttons
@@ -27,7 +39,8 @@ sequenceDiagram
 
 ## Quick Start
 
-Install and set up the skill across all your AI coding agents (Cursor, Claude Code, Antigravity, Windsurf) in one command:
+Install and set up the skill across all your coding agents (Cursor, Claude Code,
+Antigravity, Windsurf) in one command:
 
 ```bash
 npx skills add alhinawi/telegram-notifier
@@ -37,14 +50,12 @@ The interactive setup wizard will run automatically to:
 
 1. Connect your Telegram Bot Token and auto-detect your Chat ID.
 2. Configure workspace folders for scanning recent projects (`WORKSPACE_DIRS`).
-3. Set your preferred AI Agent CLI tool (`gemini`, `claude`, `aider`).
+3. Set your preferred agent CLI tool (`claude`, `aider`, ...).
 4. Auto-install and start the background daemon service (`launchd` on macOS, `systemd` on Linux, Startup on Windows).
 
 ---
 
 ## How to Update
-
-To update the skill to the latest version at any time:
 
 ```bash
 npx skills update alhinawi/telegram-notifier
@@ -68,11 +79,12 @@ With the interactive daemon running, your Telegram Bot becomes a full two-way co
 | `/status`          | Shows daemon health, active project, git branch, and running task status                 |
 | `/stop`            | Aborts the currently executing task on your machine                                      |
 | `/help`            | Shows command guide and instructions                                                     |
-| _Any text message_ | Executed immediately as a prompt by your AI Agent inside the active workspace            |
+| _Any text message_ | Executed immediately as a prompt by your coding agent inside the active workspace        |
 
 ### Interactive Approval Buttons
 
-When an AI Agent requests human feedback or approval, it sends interactive buttons directly to your Telegram chat:
+When a coding agent requests human feedback or approval, it sends interactive buttons
+directly to your Telegram chat:
 
 - **Approve / موافق**
 - **Reject / رفض**
@@ -104,33 +116,15 @@ npm run service:restart
 
 ### Supported Operating Systems
 
-- **macOS**: Configures a user `launchd` agent in `~/Library/LaunchAgents/com.telegram-notifier.daemon.plist`
-- **Linux**: Configures a user `systemd` unit in `~/.config/systemd/user/telegram-notifier.service`
-- **Windows**: Configures startup launcher in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
-
----
-
-## 1-Click Prompt for AI Agents
-
-Give this prompt to your AI Agent (Antigravity, Claude Code, Cursor, Windsurf, Copilot) to install and configure everything automatically:
-
-### English Prompt
-
-```text
-Please install and configure the telegram-notifier skill by running `npx skills add alhinawi/telegram-notifier` (or via https://github.com/alhinawi/telegram-notifier). Follow the setup instructions to configure the bot token and chat ID, and make sure to automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
-```
-
-### Arabic Prompt (برومبت بالعربي)
-
-```text
-من فضلك قم بتثبيت وإعداد مهارة telegram-notifier عبر تشغيل الأمر `npx skills add alhinawi/telegram-notifier` (أو من المستودع https://github.com/alhinawi/telegram-notifier). اتبع خطوات الإعداد لربط الـ Bot Token والـ Chat ID، واحرص على إرسال إشعار تليجرام تلقائياً في كل مرة تنتهي فيها من مهمة، أو تحتاج إذني وموافقتي، أو عند حدوث أي خطأ بدون أن أحتاج لتشغيلها يدوياً.
-```
+- **macOS**: user `launchd` agent in `~/Library/LaunchAgents/com.telegram-notifier.daemon.plist`
+- **Linux**: user `systemd` unit in `~/.config/systemd/user/telegram-notifier.service`
+- **Windows**: startup launcher in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
 
 ---
 
 ## Language Options & Presets
 
-You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or specify `--lang` per call:
+Configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or pass `--lang` per call:
 
 | Event Type                 | English (`en`)      | Arabic (`ar`)           |
 | -------------------------- | ------------------- | ----------------------- |
@@ -140,17 +134,15 @@ You can configure the language in `.env` (`NOTIFICATION_LANGUAGE=en|ar`) or spec
 
 ---
 
-## How AI Agents Trigger Notifications
+## How Agents Trigger Notifications
 
 ### 1. Installed via Skills CLI (Recommended)
 
-When installed via `npx skills add alhinawi/telegram-notifier`, your AI Agent (Cursor, Claude Code, Antigravity, Windsurf) automatically discovers the skill from `SKILL.md` and triggers notifications without manual configuration.
+When installed via `npx skills add alhinawi/telegram-notifier`, your coding agent
+(Cursor, Claude Code, Antigravity, Windsurf) automatically discovers the skill from
+`SKILL.md` and triggers notifications without manual configuration.
 
-### 2. Antigravity & Gemini CLI
-
-Installed globally via `npm run setup` in `~/.gemini/config/plugins/telegram-notifier/` or via `npx skills add alhinawi/telegram-notifier -g`. The agent detects the skill and triggers it automatically.
-
-### 3. Claude Code
+### 2. Claude Code
 
 Install via `npx skills add alhinawi/telegram-notifier -a claude-code` or instruct in `CLAUDE.md`:
 
@@ -159,13 +151,21 @@ When completing any task, needing human approval, or encountering an error:
 Execute `node /path/to/telegram-notifier/scripts/notify.js --type="task_finished" --message="Summary of changes"`
 ```
 
-### 4. Cursor & Windsurf
+### 3. Cursor & Windsurf
 
 Install via `npx skills add alhinawi/telegram-notifier` or add to `.cursorrules` / `.windsurfrules`:
 
 ```markdown
 When completing any task, needing human approval, or encountering an error:
 Execute `node /path/to/telegram-notifier/scripts/notify.js --type=task_finished`
+```
+
+### 4. One-Click Prompt
+
+Give this prompt to your coding agent to install and configure everything automatically:
+
+```text
+Please install and configure the telegram-notifier skill by running `npx skills add alhinawi/telegram-notifier` (or via https://github.com/alhinawi/telegram-notifier). Follow the setup instructions to configure the bot token and chat ID, and make sure to automatically trigger a Telegram notification whenever you finish a task, need my approval, or encounter an error.
 ```
 
 ---
@@ -219,3 +219,11 @@ For iPhone (iOS) users, [TeamViewer](https://www.teamviewer.com/) provides a smo
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+Made with care by **Mohamed Alhinawi**
+
+</div>
